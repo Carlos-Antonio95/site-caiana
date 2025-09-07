@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('discount_value',10,2);
             $table->decimal('min_discount',10,2);
             $table->date('expiration_date');
-            $table->int('max_use');
+            $table->integer('max_use');
             $table->boolean('active');
 
 
