@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_promotions');
             $table->unsignedBigInteger('id_products');
             $table->foreign('id_promotions')->on('promotions')->references('id')->onUpdate('cascade')->onDelete('cascade');
-           // $table->foreign('id_products')->on('products')->references('id')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('id_products')->on('products')->references('id')->onUpdate('cascade')->onDelete('cascade');
             $table->decimal('percentage_discount',5,2)->nullable();
             $table->decimal('promotional _price',5,2)->nullable();
             $table->timestamps();
