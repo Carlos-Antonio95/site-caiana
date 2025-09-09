@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_admins');
             $table->foreign('id_admins')->references('id')->on('Users')->onUpdate('cascade')->onDelete('cascade');
             $table->string('activity', 200);
-            $table->varchar('ip_address', 50)->nullable();
+            $table->string('ip_address', 50)->nullable();
             $table->timestamps();
         });
     }
