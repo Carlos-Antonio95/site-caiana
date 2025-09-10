@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_clients');
             $table->foreign('id_clients')->references('id')->on ('clients')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('addresses_name',200);
             $table->string('road',200);//rua
             $table->string('number',10);
             $table->string('complement',50)->nullable()->default('Não informado');

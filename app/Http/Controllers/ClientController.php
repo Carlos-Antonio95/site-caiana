@@ -127,4 +127,14 @@ class ClientController extends Controller
             abort(403, 'Acesso negado! Você não pode acessar este cliente.');
         }
     }
+
+    /**
+     * Função para verificar se o usuário logado é admin.
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
+    }
 }
