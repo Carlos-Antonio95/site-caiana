@@ -12,15 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
-            $table->timestamps();
+            $table->id(); // id
+            $table->string('name'); // nome
+            $table->string('email')->unique(); // email
+            $table->timestamp('email_verified_at')->nullable(); // verificação email
+            $table->string('password'); // senha
+            $table->rememberToken(); // token para "lembrar-me"
+            $table->foreignId('current_team_id')->nullable(); // teams (Jetstream)
+            $table->string('profile_photo_path', 2048)->nullable(); // foto (Jetstream)
+            $table->timestamps(); // created_at e updated_at
+            $table->enum('role', ['cliente', 'admin'])->default('cliente');
+
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
