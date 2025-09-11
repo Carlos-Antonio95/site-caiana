@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
 use App\Models\Addresses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

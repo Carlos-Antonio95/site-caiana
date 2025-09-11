@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\AddressesController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,6 +14,7 @@ Route::get('/', function () {
 // Rotas CRUD normais
 Route::resource('users', UserController::class);
 Route::resource('clients', ClientController::class);
+Route::resource('adressesses',AddressesController::class);
 
 // Rota para promover cliente a admin
 Route::put('/users/{user}/promote', [UserController::class, 'promoteToAdmin'])
