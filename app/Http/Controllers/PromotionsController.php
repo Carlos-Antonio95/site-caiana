@@ -1,65 +1,117 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
 use App\Models\Promotions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PromotionsController extends Controller
 {
+    // Middleware para proteger rotas
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
-     * Display a listing of the resource.
+     * Listar todas as promoções
      */
     public function index()
     {
-        //
+        $promotions = Promotions::all();
+        return view('promotions.index', compact('promotions'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar formulário para criar nova promoção
      */
     public function create()
     {
-        //
+        $this->authorizeAdmin();
+        return view('promotions.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salvar promoção no banco
      */
     public function store(Request $request)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'description' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'banner' => 'nullable|string|max:255',
+            'active' => 'required|boolean',
+        ]);
+
+        Promotions::create($request->all());
+
+        return redirect()->route('promotions.index')->with('success', 'Promoção criada com sucesso!');
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar detalhes de uma promoção
      */
-    public function show(Promotions $promotions)
+    public function show(Promotions $promotion)
     {
-        //
+        return view('promotions.show', compact('promotion'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar formulário de edição
      */
-    public function edit(Promotions $promotions)
+    public function edit(Promotions $promotion)
     {
-        //
+        $this->authorizeAdmin();
+        return view('promotions.edit', compact('promotion'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualizar promoção no banco
      */
-    public function update(Request $request, Promotions $promotions)
+    public function update(Request $request, Promotions $promotion)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'description' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'banner' => 'nullable|string|max:255',
+            'active' => 'required|boolean',
+        ]);
+
+        $promotion->update($request->all());
+
+        return redirect()->route('promotions.index')->with('success', 'Promoção atualizada com sucesso!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deletar promoção
      */
-    public function destroy(Promotions $promotions)
+    public function destroy(Promotions $promotion)
     {
-        //
+        $this->authorizeAdmin();
+
+        $promotion->delete();
+
+        return redirect()->route('promotions.index')->with('success', 'Promoção deletada com sucesso!');
+    }
+
+    /**
+     * Função para verificar se o usuário logado é admin
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
     }
 }

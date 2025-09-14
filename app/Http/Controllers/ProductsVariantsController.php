@@ -1,65 +1,120 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
+use App\Models\Products;
 use App\Models\Products_Variants;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductsVariantsController extends Controller
 {
+   // Middleware para proteger rotas
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
-     * Display a listing of the resource.
+     * Listar todas as variantes
      */
     public function index()
     {
-        //
+        $variants = Products_Variants::with('product')->get();
+        return view('product_variants.index', compact('variants'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar formulário para criar nova variante
      */
     public function create()
     {
-        //
+        $this->authorizeAdmin();
+
+        $products = Products::all();
+        return view('product_variants.create', compact('products'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salvar variante no banco
      */
     public function store(Request $request)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_products' => 'required|exists:products,id',
+            'size' => 'required|string|max:10',
+            'color' => 'required|string|max:50',
+            'additional_price' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+        ]);
+
+        Products_Variants::create($request->all());
+
+        return redirect()->route('product_variants.index')->with('success', 'Variante criada com sucesso!');
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar detalhes de uma variante
      */
-    public function show(Products_Variants $products_Variants)
+    public function show(Products_Variants $productVariant)
     {
-        //
+        return view('product_variants.show', compact('productVariant'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar formulário de edição
      */
-    public function edit(Products_Variants $products_Variants)
+    public function edit(Products_Variants $productVariant)
     {
-        //
+        $this->authorizeAdmin();
+
+        $products = Products::all();
+        return view('product_variants.edit', compact('productVariant', 'products'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualizar variante no banco
      */
-    public function update(Request $request, Products_Variants $products_Variants)
+    public function update(Request $request, Products_Variants $productVariant)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_products' => 'required|exists:products,id',
+            'size' => 'required|string|max:10',
+            'color' => 'required|string|max:50',
+            'additional_price' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+        ]);
+
+        $productVariant->update($request->all());
+
+        return redirect()->route('product_variants.index')->with('success', 'Variante atualizada com sucesso!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deletar variante
      */
-    public function destroy(Products_Variants $products_Variants)
+    public function destroy(Products_Variants $productVariant)
     {
-        //
+        $this->authorizeAdmin();
+
+        $productVariant->delete();
+
+        return redirect()->route('product_variants.index')->with('success', 'Variante deletada com sucesso!');
+    }
+
+    /**
+     * Função para verificar se o usuário logado é admin
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
     }
 }

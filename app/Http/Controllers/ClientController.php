@@ -106,9 +106,7 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Acesso negado! Apenas admins podem deletar clientes.');
-        }
+        $this->authorizeAdmin();
 
         $client->delete();
 

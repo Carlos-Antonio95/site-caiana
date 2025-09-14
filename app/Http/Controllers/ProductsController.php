@@ -1,65 +1,122 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Categories;
 
 class ProductsController extends Controller
-{
+ {
+    // Middleware para proteger rotas
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
-     * Display a listing of the resource.
+     * Listar todos os produtos
      */
     public function index()
     {
-        //
+        $products = Products::with('category')->get();
+        return view('products.index', compact('products'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar formulário para criar novo produto
      */
     public function create()
     {
-        //
+        $this->authorizeAdmin();
+
+        $categories = Categories::all();
+        return view('products.create', compact('categories'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salvar produto no banco
      */
     public function store(Request $request)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_categories' => 'required|exists:categories,id',
+            'product_name' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'status' => 'required|in:ativo,inativo',
+        ]);
+
+        Products::create($request->all());
+
+        return redirect()->route('products.index')->with('success', 'Produto criado com sucesso!');
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar detalhes de um produto
      */
-    public function show(Products $products)
+    public function show(Products $product)
     {
-        //
+        return view('products.show', compact('product'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar formulário de edição
      */
-    public function edit(Products $products)
+    public function edit(Products $product)
     {
-        //
+        $this->authorizeAdmin();
+
+        $categories = Categories::all();
+        return view('products.edit', compact('product', 'categories'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualizar produto no banco
      */
-    public function update(Request $request, Products $products)
+    public function update(Request $request, Products $product)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_categories' => 'required|exists:categories,id',
+            'product_name' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'status' => 'required|in:ativo,inativo',
+        ]);
+
+        $product->update($request->all());
+
+        return redirect()->route('products.index')->with('success', 'Produto atualizado com sucesso!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deletar produto
      */
-    public function destroy(Products $products)
+    public function destroy(Products $product)
     {
-        //
+        $this->authorizeAdmin();
+
+        $product->delete();
+
+        return redirect()->route('products.index')->with('success', 'Produto deletado com sucesso!');
+    }
+
+    /**
+     * Função para verificar se o usuário logado é admin
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
     }
 }

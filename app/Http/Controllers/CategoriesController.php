@@ -1,65 +1,116 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
 use App\Models\categories;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
 class CategoriesController extends Controller
-{
+{  // Middleware para proteger rotas
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
-     * Display a listing of the resource.
+     * Listar todas as categorias
+     * Admin vê todos, cliente apenas visualiza (se aplicável)
      */
     public function index()
     {
-        //
+        $categories = Categories::all(); // qualquer usuário logado vê
+        return view('categories.index', compact('categories'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar formulário para criar nova categoria
+     * Apenas admin
      */
     public function create()
     {
-        //
+        $this->authorizeAdmin();
+        return view('categories.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salvar categoria no banco
      */
     public function store(Request $request)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'category_name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        Categories::create([
+            'category_name' => $request->category_name,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('categories.index')->with('success', 'Categoria criada com sucesso!');
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar detalhes de uma categoria
      */
-    public function show(categories $categories)
+    public function show(Categories $category)
     {
-        //
+        return view('categories.show', compact('category'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar formulário de edição
      */
-    public function edit(categories $categories)
+    public function edit(Categories $category)
     {
-        //
+        $this->authorizeAdmin();
+        return view('categories.edit', compact('category'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualizar categoria no banco
      */
-    public function update(Request $request, categories $categories)
+    public function update(Request $request, Categories $category)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'category_name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $category->update([
+            'category_name' => $request->category_name,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('categories.index')->with('success', 'Categoria atualizada com sucesso!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deletar categoria
      */
-    public function destroy(categories $categories)
+    public function destroy(Categories $category)
     {
-        //
+        $this->authorizeAdmin();
+
+        $category->delete();
+
+        return redirect()->route('categories.index')->with('success', 'Categoria deletada com sucesso!');
+    }
+
+    /**
+     * Função para verificar se o usuário logado é admin.
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
     }
 }

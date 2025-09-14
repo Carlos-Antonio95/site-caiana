@@ -123,7 +123,10 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $this->authorizeAdmin();
-
+        // Impede que um admin se delete acidentalmente
+        if (Auth::id() === $user->id) {
+            return redirect()->route('users.index')->with('error', 'Você não pode deletar a si mesmo.');
+        }
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'Usuário excluído com sucesso!');

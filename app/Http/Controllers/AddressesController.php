@@ -127,9 +127,8 @@ class AddressesController extends Controller
      */
     public function destroy(Addresses $addresses)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Acesso negado! Apenas admins podem deletar clientes.');
-        }
+        
+        $this->authorizeAdmin();
 
         $addresses->delete();
 

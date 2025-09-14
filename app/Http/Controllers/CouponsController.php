@@ -1,65 +1,120 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
 use App\Models\Coupons;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class CouponsController extends Controller
-{
+
+   {
+    public function __construct()
+    {
+        // Aplica middleware auth para proteger todas as rotas
+        $this->middleware('auth');
+    }
+
     /**
-     * Display a listing of the resource.
+     * Exibe a lista de cupons
      */
     public function index()
     {
-        //
+        $this->authorizeAdmin();
+        $coupons = Coupons::all();
+        return view('coupons.index', compact('coupons'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Exibe o formulário de criação de cupom
      */
     public function create()
     {
-        //
+        $this->authorizeAdmin();
+        return view('coupons.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salva um novo cupom no banco
      */
     public function store(Request $request)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'code' => 'required|string|max:50|unique:coupons,code',
+            'discount_type' => 'required|in:valor,percentual',
+            'discount_value' => 'required|numeric|min:0',
+            'min_discount' => 'required|numeric|min:0',
+            'expiration_date' => 'required|date',
+            'max_use' => 'required|integer|min:1',
+            'active' => 'required|boolean',
+        ]);
+
+        Coupons::create($request->all());
+
+        return redirect()->route('coupons.index')->with('success', 'Cupom criado com sucesso!');
     }
 
     /**
-     * Display the specified resource.
+     * Exibe os detalhes de um cupom
      */
-    public function show(Coupons $coupons)
+    public function show(Coupons $coupon)
     {
-        //
+        $this->authorizeAdmin();
+        return view('coupons.show', compact('coupon'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Exibe o formulário de edição de um cupom
      */
-    public function edit(Coupons $coupons)
+    public function edit(Coupons $coupon)
     {
-        //
+        $this->authorizeAdmin();
+        return view('coupons.edit', compact('coupon'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualiza os dados de um cupom
      */
-    public function update(Request $request, Coupons $coupons)
+    public function update(Request $request, Coupons $coupon)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'code' => 'required|string|max:50|unique:coupons,code,' . $coupon->id,
+            'discount_type' => 'required|in:valor,percentual',
+            'discount_value' => 'required|numeric|min:0',
+            'min_discount' => 'required|numeric|min:0',
+            'expiration_date' => 'required|date',
+            'max_use' => 'required|integer|min:1',
+            'active' => 'required|boolean',
+        ]);
+
+        $coupon->update($request->all());
+
+        return redirect()->route('coupons.index')->with('success', 'Cupom atualizado com sucesso!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deleta um cupom
      */
-    public function destroy(Coupons $coupons)
+    public function destroy(Coupons $coupon)
     {
-        //
+        $this->authorizeAdmin();
+        $coupon->delete();
+
+        return redirect()->route('coupons.index')->with('success', 'Cupom deletado com sucesso!');
+    }
+
+    /**
+     * Função para verificar se o usuário logado é admin
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
     }
 }

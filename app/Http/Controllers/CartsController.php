@@ -1,65 +1,110 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/** 
+ * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
+ */
 use App\Models\Carts;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+use App\Models\Client;
 class CartsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['show']);
+    }
+
     /**
-     * Display a listing of the resource.
+     * Lista todos os carrinhos (apenas admin).
      */
     public function index()
     {
-        //
+        $this->authorizeAdmin();
+        $carts = Carts::with('client')->get();
+        return view('carts.index', compact('carts'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Formulário para criar um carrinho (geralmente só sistema cria).
      */
     public function create()
     {
-        //
+        $this->authorizeAdmin();
+        $clients = Client::all();
+        return view('carts.create', compact('clients'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salva novo carrinho.
      */
     public function store(Request $request)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_clients' => 'nullable|exists:clients,id',
+            'token_session' => 'required|string|max:100|unique:carts,token_session',
+        ]);
+
+        Carts::create($request->all());
+
+        return redirect()->route('carts.index')->with('success', 'Carrinho criado com sucesso!');
     }
 
     /**
-     * Display the specified resource.
+     * Mostra detalhes de um carrinho específico.
      */
-    public function show(Carts $carts)
+    public function show(Carts $cart)
     {
-        //
+        $cart->load(['client', 'items']);
+        return view('carts.show', compact('cart'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Formulário para editar um carrinho.
      */
-    public function edit(Carts $carts)
+    public function edit(Carts $cart)
     {
-        //
+        $this->authorizeAdmin();
+        $clients = Client::all();
+        return view('carts.edit', compact('cart', 'clients'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualiza carrinho.
      */
-    public function update(Request $request, Carts $carts)
+    public function update(Request $request, Carts $cart)
     {
-        //
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_clients' => 'nullable|exists:clients,id',
+            'token_session' => 'required|string|max:100|unique:carts,token_session,' . $cart->id,
+        ]);
+
+        $cart->update($request->all());
+
+        return redirect()->route('carts.index')->with('success', 'Carrinho atualizado com sucesso!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove carrinho.
      */
-    public function destroy(Carts $carts)
+    public function destroy(Carts $cart)
     {
-        //
+        $this->authorizeAdmin();
+        $cart->delete();
+        return redirect()->route('carts.index')->with('success', 'Carrinho removido com sucesso!');
+    }
+
+    /**
+     * Apenas admins podem manipular carrinhos diretamente.
+     */
+    private function authorizeAdmin()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
+        }
     }
 }
