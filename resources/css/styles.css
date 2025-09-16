@@ -159,3 +159,99 @@ body{
 .no-underline {
     text-decoration: none !important;
 }
+
+/* Fundo da tela */
+.auth-wrapper {
+    min-height: 100vh;               /* ocupa toda altura da tela */
+    display: flex;                   /* centralização flex */
+    align-items: center;             /* centraliza vertical */
+    justify-content: center;         /* centraliza horizontal */
+    background: #f3f4f6;             /* cinza claro (tailwind bg-gray-100) */
+    padding: 1rem;
+}
+
+/* Caixa de login */
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Título */
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #1f2937; /* text-gray-800 */
+}
+
+/* Inputs */
+.auth-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #d1d5db;   /* border-gray-300 */
+    border-radius: 8px;
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-input:focus {
+    border-color: #4f46e5;        /* indigo-600 */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+/* Botão */
+.auth-btn {
+    width: 100%;
+    background: #3f4ca3;          /* indigo-600 */
+    color: #fff;
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-btn:hover {
+    background: #4338ca;          /* indigo-700 */
+}
+
+/* Links */
+.auth-link {
+    font-size: 0.875rem;
+    color: #4f46e5;
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Mensagens de erro */
+.auth-error {
+    font-size: 0.875rem;
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+/* Mensagens de status */
+.auth-status {
+    font-size: 0.875rem;
+    color: #16a34a;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}

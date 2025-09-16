@@ -18,6 +18,8 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\OrderItemsController;
 use app\Http\Controllers\PaymentsController;
 use App\Http\Controllers\AdminActivityController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 //rotas de visualização
 Route::get('/', function () {
@@ -32,8 +34,27 @@ Route::get('/promocoes', function () {
 Route::get('/contato', function () {
     return view('contato');
 })->name('contato');
+Route::get('/login', function () {
+    return view('login');
+})->name('login');
+Route::get('/register', function () {
+    return view('register');
+})->name('register');
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.reset');
 
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.update');
 
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.request');
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.email');
 
 
 // Rotas CRUD normais

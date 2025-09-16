@@ -20,6 +20,12 @@
 
             @auth
                 <span class="user-greeting">Olá, {{ Auth::user()->name }}!</span>
+                
+                {{-- Link só aparece se for admin --}}
+                @if(Auth::user()->role === 'admin')
+                    <a href="{{ route('dashboard') }}" class="btn btn-link no-underline">Painel</a>
+                @endif
+
                 <form action="{{ route('logout') }}" method="POST" style="display:inline">
                     @csrf
                     <button type="submit" class="btn btn-link">Sair</button>
@@ -27,7 +33,6 @@
             @else
                 <a href="{{ route('login') }}" class="btn btn-link no-underline">Entrar</a>
                 <a href="{{ route('register') }}" class="btn btn-link no-underline">Cadastrar</a>
-
             @endauth
         </div>
     </div>
