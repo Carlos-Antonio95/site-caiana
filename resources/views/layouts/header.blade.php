@@ -14,13 +14,15 @@
 
         <div class="actions">
             <input type="search" id="search" placeholder="Buscar…" />
+
+            {{-- Botão do carrinho --}}
             <button id="btn-cart" class="btn btn-dark" aria-label="Abrir carrinho">
-                🛍️ <span id="cart-count">{{ session('cart.count', 0) }}</span>
+               🛍️ <span id="cart-count">0</span>
             </button>
 
             @auth
                 <span class="user-greeting">Olá, {{ Auth::user()->name }}!</span>
-                
+
                 {{-- Link só aparece se for admin --}}
                 @if(Auth::user()->role === 'admin')
                     <a href="{{ route('dashboard') }}" class="btn btn-link no-underline">Painel</a>
