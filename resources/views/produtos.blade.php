@@ -7,6 +7,9 @@
 @section('content')
 <main id="produtos">
   
+  <!-- CATÁLOGO -->
+      
+
     <section class="container" style="padding-top:2rem;">
       <h2>Todos os Produtos</h2>
       <div class="products">

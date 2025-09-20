@@ -21,6 +21,26 @@
 
     {{-- Footer incluído --}}
     @include('layouts.footer')
+      <!-- Drawer do carrinho -->
+ <aside class="drawer" id="drawer">
+        <div class="drawer-head">
+            <h3>Seu Carrinho</h3>
+            <button class="btn-icon" id="close-drawer" aria-label="Fechar">✕</button>
+        </div>
+        <div class="drawer-body" id="cart-items"></div>
+        <div class="drawer-foot">
+            <div class="totals">
+                <span>Subtotal</span>
+                <strong id="subtotal">R$ 0,00</strong>
+            </div>
+            <button class="btn btn-primary" id="checkout">Finalizar Pedido</button>
+            <p class="secure">🔒 Compra segura e confiável</p>
+        </div>
+    </aside>
+
+    <div class="backdrop" id="backdrop"></div>
+
+  <script src="{{ asset('js/cart.js') }}"></script>
 
     <script src="{{ asset('js/app1.js') }}"></script>
 </body>
