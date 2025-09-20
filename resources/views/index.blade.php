@@ -40,9 +40,11 @@
             </div>
         </aside>
 
-        <div class="products">
-            <!-- Cards são populados via JS -->
+
+      <div class="products">
+    <!-- Cards são populados via JS -->
         </div>
+
     </section>
 
     <!-- CHECKOUT DRAWER -->
