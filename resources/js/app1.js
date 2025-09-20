@@ -82,7 +82,10 @@ let filters = {
   maxPrice: parseFloat(els.preco.value)
 };
 
-let cart = [];
+//let cart = []; 19/09
+// Persist cart in localStorage
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
 
 // ===== Utils =====
 const BRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -116,7 +119,22 @@ function renderProducts(){
     });
   });
 }
+function addToCart(id){
+  const item = cart.find(i => i.id === id);
+  if(item) item.qty += 1;
+  else{
+    const prod = PRODUCTS.find(p => p.id === id);
+    cart.push({ id: prod.id, title: prod.title, price: prod.price, img: prod.img, qty: 1 });
+  }
 
+  // salva no localStorage
+  localStorage.setItem('cart', JSON.stringify(cart));
+
+  renderCart();
+  openDrawer();
+}
+
+/*
 function addToCart(id){
   const item = cart.find(i => i.id === id);
   if(item) item.qty += 1;
@@ -126,7 +144,7 @@ function addToCart(id){
   }
   renderCart();
   openDrawer();
-}
+}*/
 
 function renderCart(){
   els.cartItems.innerHTML = cart.length
@@ -159,13 +177,32 @@ function renderCart(){
 function qtyInc(e){
   const id = parseInt(e.target.closest(".cart-item").dataset.id, 10);
   cart = cart.map(i => i.id === id ? {...i, qty: i.qty + 1} : i);
+
+  localStorage.setItem('cart', JSON.stringify(cart)); // <-- salva
+
+  renderCart();
+}
+
+function qtyDec(e){
+  const id = parseInt(e.target.closest(".cart-item").dataset.id, 10);
+  cart = cart.map(i => i.id === id ? {...i, qty: i.qty - 1} : i).filter(i => i.qty > 0);
+
+  localStorage.setItem('cart', JSON.stringify(cart)); // <-- salva
+
+  renderCart();
+}
+
+/*
+function qtyInc(e){
+  const id = parseInt(e.target.closest(".cart-item").dataset.id, 10);
+  cart = cart.map(i => i.id === id ? {...i, qty: i.qty + 1} : i);
   renderCart();
 }
 function qtyDec(e){
   const id = parseInt(e.target.closest(".cart-item").dataset.id, 10);
   cart = cart.map(i => i.id === id ? {...i, qty: i.qty - 1} : i).filter(i => i.qty > 0);
   renderCart();
-}
+}*/
 
 // ===== Drawer =====
 function openDrawer(){
@@ -227,10 +264,21 @@ els.preco.addEventListener("input", e => {
 els.checkout.addEventListener("click", () => {
   alert("✅ Pedido finalizado! (Fluxo de pagamento fictício para demo)");
   cart = [];
+  
+  localStorage.setItem('cart', JSON.stringify(cart)); // <-- limpa o carrinho
+
   renderCart();
   closeDrawer();
 });
 
+/*
+els.checkout.addEventListener("click", () => {
+  alert("✅ Pedido finalizado! (Fluxo de pagamento fictício para demo)");
+  cart = [];
+  renderCart();
+  closeDrawer();
+});
+*/
 // Footer year
 document.querySelector("#year").textContent = new Date().getFullYear();
 

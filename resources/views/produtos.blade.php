@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Produtos — CAIANA</title>
+  @section('title', 'CAIANA — Produtos')
+
   <link rel="stylesheet" href="styles.css" />
   @vite(['resources/css/styles.css', 'resources/js/app1.js'])
 </head>
 <body>
+  
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">

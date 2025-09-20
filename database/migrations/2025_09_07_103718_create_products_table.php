@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_categories');
             $table->foreign('id_categories')->references('id')->on('categories');
-            $table->string('product_name',150);
+            $table->string('title',150);
             $table->text('description')->nullable();
             $table->decimal('price',10,2);
             $table->integer('stock_quantity')->default(0);
