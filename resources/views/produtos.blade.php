@@ -1,35 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  @section('title', 'CAIANA — Produtos')
+@extends('layouts.app')
 
-  <link rel="stylesheet" href="styles.css" />
-  @vite(['resources/css/styles.css', 'resources/js/app1.js'])
-</head>
-<body>
-  
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="brand">
-        <span class="logo-text">CAIANA</span>
-        <span class="logo-parrot" aria-hidden="true">🦜</span>
-      </div>
-      <nav class="main-nav">
-        <a href="{{ route('index') }}">Início</a>
-        <a href="{{ route('produtos') }}" class="is-active">Produtos</a>
-        <a href="{{ route('promocoes') }}">Promoções</a>
-        <a href="{{ route('contato') }}">Contato</a>
-      </nav>
-      <div class="actions">
-        <input type="search" id="search" placeholder="Buscar…" />
-        <button id="btn-cart" class="btn btn-dark" aria-label="Abrir carrinho">🛍️ <span id="cart-count">0</span></button>
-      </div>
-    </div>
-  </header>
+@section('title', 'CAIANA — Produtos')
 
-  <main>
+@section('nav-index', 'is-active') <!-- Aba ativa -->
+
+@section('content')
+<main id="produtos">
     <section class="container" style="padding-top:2rem;">
       <h2>Todos os Produtos</h2>
       <div class="products">
@@ -59,21 +35,11 @@
         <!-- Adicione mais produtos conforme necessário -->
       </div>
     </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> CAIANA • Moda Tropical</p>
-      <div class="mini">
-        <a href="#">Política de Privacidade</a>
-        <a href="#">Termos</a>
-      </div>
-    </div>
-  </footer>
+ 
  
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-</body>
-</html>
+   </main>
+@endsection
