@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/product_reviews/create/{id}', [ProductReviewsController::class, 'create'])
         ->name('product_reviews.create');
 });
+Route::get('/cart', [CartsController::class, 'showCart'])->name('cart.show');
+Route::post('/addresses', [AddressesController::class, 'store'])->name('addresses.store');
 
 // ===================== Dashboard (protegido) =====================
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])

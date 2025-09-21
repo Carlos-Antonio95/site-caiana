@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Client;
 use App\Models\CartItems;
+use App\Models\Addresses;
 class CartsController extends Controller
 {
     public function __construct()
@@ -113,15 +114,21 @@ public function checkout(Request $request)
 {
     $user = Auth::user();
     $items = $request->input('items', []);
+    $addressId = $request->input('address_id');
 
     if (empty($items)) {
         return response()->json(['message' => 'Carrinho vazio'], 400);
+    }
+
+    if (!$addressId || !Addresses::where('id_clients', $user->id)->where('id', $addressId)->exists()) {
+        return response()->json(['message' => 'Endereço inválido'], 400);
     }
 
     // Cria o carrinho
     $cart = Carts::create([
         'id_clients' => $user->id,
         'session_id' => session()->getId(),
+        'id_addresses' => $addressId // salva o endereço escolhido
     ]);
 
     // Cria os itens
@@ -135,11 +142,17 @@ public function checkout(Request $request)
         ]);
     }
 
-        
-
-  return response()->json([
+    return response()->json([
         'message' => 'Pedido finalizado com sucesso!',
         'cart_id' => $cart->id
     ]);
+}
+
+
+public function showCart()
+{
+    $user = Auth::user();
+    $addresses = Addresses::where('id_clients', $user->id)->get(); // pega todos
+    return view('cart', compact('addresses'));
 }
 }

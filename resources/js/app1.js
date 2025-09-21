@@ -198,3 +198,80 @@ logoutForm?.addEventListener('submit', () => {
 // ===== Init =====
 fetchProducts();
 renderCart();
+
+//logica endreço no checkout bucar enreço api correios
+document.getElementById('btn-cep')?.addEventListener('click', async () => {
+    const cep = document.getElementById('cep').value.replace(/\D/g,'');
+    if(!cep) return alert("Digite um CEP válido");
+
+    try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+
+        if(data.erro) return alert("CEP não encontrado");
+
+        document.getElementById('road').value = data.logradouro;
+        document.getElementById('neighborhood').value = data.bairro;
+        document.getElementById('city').value = data.localidade;
+        document.getElementById('state').value = data.uf;
+    } catch(err) {
+        console.error(err);
+        alert("Erro ao buscar CEP");
+    }
+});
+
+//enviar formulário endereço
+document.getElementById('address-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    try {
+        const res = await fetch('/addresses', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData
+        });
+        if(res.ok) {
+            alert('Endereço salvo!');
+            window.location.reload(); // Recarrega para não mostrar mais o formulário
+        } else {
+            alert('Erro ao salvar endereço');
+        }
+    } catch(err) {
+        console.error(err);
+        alert('Erro ao salvar endereço');
+    }
+});
+//outro endereço
+document.getElementById('btn-change-address')?.addEventListener('click', () => {
+    const form = document.getElementById('address-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+});
+
+//escolher qual endereço usar no checkout
+document.getElementById("checkout")?.addEventListener("click", () => {
+    const addressId = document.getElementById("address_id")?.value;
+
+    fetch("/cart/checkout", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            items: cart,
+            address_id: addressId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("✅ " + data.message);
+        cart = [];
+        saveCart();
+        renderCart();
+    })
+    .catch(err => console.error("Erro no checkout:", err));
+});
+

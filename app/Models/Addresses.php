@@ -8,12 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Addresses extends Model
 {
     use HasFactory;
-    /**
-     * Campos que podem ser preenchidos em massa
-     */
+
     protected $fillable = [
         'id_clients',
-        'addresses_name',
         'road',
         'number',
         'complement',
@@ -26,10 +23,10 @@ class Addresses extends Model
     ];
 
     /**
-     * Relacionamento: Endereço pertence a um cliente
+     * Relacionamento: endereço pertence a um cliente
      */
-    public function client(){
+    public function client()
+    {
         return $this->belongsTo(Client::class, 'id_clients');
     }
-    
 }
