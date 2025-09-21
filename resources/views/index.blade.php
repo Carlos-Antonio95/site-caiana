@@ -14,7 +14,7 @@
             <a href="#catalogo" class="btn btn-dark">Ver Produtos</a>
         </div>
         <div class="hero-art">
-            <img src="assets\e7149891-7f4f-4168-98d6-2c27cf981baf.jpg" alt="Coleção tropical CAIANA" />
+            <img src="assets\rosa.jpg" alt="Coleção tropical CAIANA" />
         </div>
     </section>
 

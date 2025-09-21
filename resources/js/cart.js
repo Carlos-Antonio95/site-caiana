@@ -1,16 +1,11 @@
 // ===== Elements =====
 const els = {
-  products: document.querySelector(".products"),
-  search: document.querySelector("#search"),
-  chipCategorias: document.querySelector("#chip-categorias"),
-  preco: document.querySelector("#preco"),
-  precoVal: document.querySelector("#preco-val"),
-  cartBtn: document.querySelector("#btn-cart"),
-  drawer: document.querySelector("#drawer"),
-  backdrop: document.querySelector("#backdrop"),
   cartItems: document.querySelector("#cart-items"),
   subtotal: document.querySelector("#subtotal"),
   cartCount: document.querySelector("#cart-count"),
+  drawer: document.querySelector("#drawer"),
+  backdrop: document.querySelector("#backdrop"),
+  cartBtn: document.querySelector("#btn-cart"),
   closeDrawer: document.querySelector("#close-drawer"),
   checkout: document.querySelector("#checkout"),
 };
@@ -50,24 +45,7 @@ function renderCart() {
   document.querySelectorAll(".cart-item .dec").forEach(b => b.onclick = qtyDec);
 }
 
-// ===== Cart functions =====
-function addToCart(id, product) {
-  const item = cart.find(i => i.id === id);
-  if (item) item.qty += 1;
-  else {
-    cart.push({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      img: product.images?.[0]?.image_path || 'assets/default.jpg',
-      qty: 1
-    });
-  }
-  saveCart();
-  renderCart();
-  openDrawer();
-}
-
+// ===== Quantidade =====
 function qtyInc(e) {
   const id = parseInt(e.target.closest(".cart-item").dataset.id, 10);
   cart = cart.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i);
@@ -93,79 +71,26 @@ function updateCartCount() {
   if (els.cartCount) els.cartCount.textContent = cart.reduce((sum, i) => sum + (i.qty || 0), 0);
 }
 
-// ===== Produtos & filtros =====
-let filters = { q: "", category: "tudo", maxPrice: els.preco ? parseFloat(els.preco.value) : Infinity };
-let PRODUCTS = [];
-
-async function fetchProducts() {
-  try {
-    const res = await fetch('/api/products');
-    if (!res.ok) throw new Error('Erro ao buscar produtos');
-    PRODUCTS = await res.json();
-    renderProducts();
-  } catch (err) { console.error(err); }
-}
-
-function applyFilters(list) {
-  return list.filter(p => {
-    const catMatch = filters.category === "tudo" || p.category?.category_name.toLowerCase() === filters.category.toLowerCase();
-    const titleMatch = !filters.q || p.title.toLowerCase().includes(filters.q);
-    const priceMatch = p.price <= filters.maxPrice;
-    return catMatch && titleMatch && priceMatch;
-  });
-}
-
-function renderProducts() {
-  if (!els.products) return;
-  const items = applyFilters(PRODUCTS);
-  els.products.innerHTML = items.map(p => `
-    <article class="card" data-id="${p.id}">
-      <img src="${p.images?.[0]?.image_path || 'assets/default.jpg'}" alt="${p.title}" />
-      <h4>${p.title}</h4>
-      <div class="price">${BRL(p.price)}</div>
-      <button class="btn btn-dark add-cart">Adicionar ao carrinho</button>
-    </article>
-  `).join("");
-
-  document.querySelectorAll(".add-cart").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const id = parseInt(e.target.closest(".card").dataset.id, 10);
-      const product = PRODUCTS.find(p => p.id === id);
-      addToCart(id, product);
-    });
-  });
-}
-
-// ===== Filtros UI =====
-els.search?.addEventListener("input", e => { filters.q = e.target.value.trim().toLowerCase(); renderProducts(); });
-els.chipCategorias?.querySelectorAll(".chip").forEach(chip => {
-  chip.addEventListener("click", e => {
-    els.chipCategorias.querySelectorAll(".chip").forEach(c => c.classList.remove("is-active"));
-    e.target.classList.add("is-active");
-    filters.category = e.target.dataset.category.toLowerCase();
-    renderProducts();
-  });
-});
-els.preco?.addEventListener("input", e => {
-  filters.maxPrice = parseFloat(e.target.value);
-  if (els.precoVal) els.precoVal.textContent = `Até ${filters.maxPrice}`;
-  renderProducts();
-});
-
-// ===== Events =====
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM carregado, inicializando eventos...");
-
-  renderCart();
-
-  // Checkout
-  els.checkout?.addEventListener("click", async () => {
-    console.log("Botão de checkout clicado");
-
+// ===== Checkout =====
+// ===== Checkout =====
+if (els.checkout) {
+  // Remove qualquer listener anterior
+  const newCheckout = els.checkout.cloneNode(true);
+  els.checkout.parentNode.replaceChild(newCheckout, els.checkout);
+  
+  newCheckout.addEventListener("click", async () => {
     if (!cart.length) {
       alert("Seu carrinho está vazio.");
       return;
     }
+
+    const addressSelect = document.querySelector('#address_id');
+    if (!addressSelect || !addressSelect.value) {
+      alert("Selecione um endereço antes de finalizar o pedido.");
+      return;
+    }
+
+    const address_id = addressSelect.value;
 
     try {
       const res = await fetch("/cart/checkout", {
@@ -174,11 +99,16 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json",
           "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || ""
         },
-        body: JSON.stringify({ items: cart })
+        body: JSON.stringify({ items: cart, address_id })
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Erro ao finalizar pedido");
+
+      if (!res.ok) {
+        console.error("Erro do backend:", data);
+        alert(`❌ Erro: ${data.message || "Verifique o console"}`);
+        return;
+      }
 
       alert(`✅ ${data.message}`);
       cart = [];
@@ -186,19 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
       renderCart();
       closeDrawer();
     } catch (err) {
-      console.error("Erro no checkout:", err);
+      console.error("Erro no fetch:", err);
       alert("❌ Erro ao finalizar pedido. Confira o console.");
     }
   });
-});
-
-// ===== Footer e logout =====
-const yearEl = document.querySelector("#year");
-if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-const logoutForm = document.getElementById('logout-form');
-logoutForm?.addEventListener('submit', () => { cart = []; saveCart(); updateCartCount(); });
+}
 
 // ===== Init =====
-fetchProducts();
-renderCart();
+document.addEventListener("DOMContentLoaded", () => {
+  renderCart();
+});
