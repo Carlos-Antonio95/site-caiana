@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     UserController, ClientController, AddressesController, CategoriesController,
@@ -12,12 +13,44 @@ use App\Http\Controllers\Auth\{
     NewPasswordController, ForgotPasswordController
 };
 
+
 // ===================== Rotas de visualização =====================
 Route::view('/', 'index')->name('index');
 Route::view('/produtos', 'produtos')->name('produtos');
 Route::view('/promocoes', 'promocoes')->name('promocoes');
 Route::view('/contato', 'contato')->name('contato');
-Route::view('/login', 'login')->name('login');
+Route::view('/painel', 'painel')->name('painel');
+
+Route::get('/login', function () {
+    return view('login'); // mostra o formulário de login
+})->name('login');
+
+// rota para processar o login
+Route::post('/login', function (\Illuminate\Http\Request $request) {
+    // validação básica
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
+
+    // tenta autenticar
+    if (Auth::attempt($credentials, $request->filled('remember'))) {
+        $request->session()->regenerate();
+
+        // verifica role do usuário logado
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('dashboard'); // admins
+        } else {
+            return redirect()->route('index');     // clientes
+        }
+    }
+
+    // se falhar, volta para o login com erro
+    return back()->withErrors([
+        'email' => 'As credenciais não conferem.',
+    ]);
+});
+
 Route::view('/register', 'register')->name('register');
 Route::get('/cart', function () { return view('cart'); })->name('cart.show');
 

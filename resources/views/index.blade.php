@@ -29,7 +29,7 @@
                     <button class="chip" data-category="vestidos">Vestidos</button>
                     <button class="chip" data-category="saias">Saias</button>
                     <button class="chip" data-category="shorts">Shorts</button>
-                    <button class="chip" data-category="blusas">Blusas</button>
+                    <button class="chip" data-category="blusas">Blusas</button>                  
                 </div>
             </div>
 

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Client;
 use App\Models\CartItems;
 use App\Models\Addresses;
+use App\Models\Orders;
+use App\Models\OrderItems;
 class CartsController extends Controller
 {
     public function __construct()
@@ -109,7 +111,7 @@ class CartsController extends Controller
             abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
         }
     }
-
+/*
 public function checkout(Request $request)
 {
     $user = Auth::user();
@@ -138,6 +140,7 @@ public function checkout(Request $request)
             'id_products' => $item['id'],
             'quantity'    => $item['qty'],
             'price'       => $item['price'],
+            'title'       => $item['title'],
             'session_id'  => $cart->session_id,
         ]);
     }
@@ -148,6 +151,78 @@ public function checkout(Request $request)
     ]);
 }
 
+*/
+public function checkout(Request $request)
+{
+    $user = Auth::user();
+    $items = $request->input('items', []);
+    $addressId = $request->input('address_id');
+
+    if (empty($items)) {
+        return response()->json(['message' => 'Carrinho vazio'], 400);
+    }
+
+    if (!$addressId || !Addresses::where('id_clients', $user->id)->where('id', $addressId)->exists()) {
+        return response()->json(['message' => 'Endereço inválido'], 400);
+    }
+
+    // =========================
+    // 1. Criar o carrinho
+    // =========================
+    $cart = Carts::create([
+        'id_clients'   => $user->id,
+        'session_id'   => session()->getId(),
+        'id_addresses' => $addressId
+    ]);
+
+    // =========================
+    // 2. Criar os itens no carrinho
+    // =========================
+    $total = 0;
+    foreach ($items as $item) {
+        CartItems::create([
+            'id_carts'    => $cart->id,
+            'id_products' => $item['id'],
+            'quantity'    => $item['qty'],
+            'price'       => $item['price'],
+            'title'       => $item['title'],
+            'session_id'  => $cart->session_id,
+        ]);
+
+        $total += $item['price'] * $item['qty'];
+    }
+
+    // =========================
+    // 3. Criar o pedido (status pendente)
+    // =========================
+    $order = Orders::create([
+        'id_clients'   => $user->id,
+        'id_addresses' => $addressId,
+        'status'       => 'pendente',
+        'total_value'  => $total,
+    ]);
+
+    // =========================
+    // 4. Criar os itens do pedido
+    // =========================
+    foreach ($items as $item) {
+        $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
+        OrderItems::create([
+            'id_order'     => $order->id,
+            'id_variants'  => $item['variant_id'] ?? null, // se tiver variantes
+            'title'       => $item['title'],
+            'price'        => $item['price'],
+            'quantity'     => $quantity,
+        ]);
+    }
+
+    return response()->json([
+        'message'  => 'Pedido finalizado com sucesso!',
+        'cart_id'  => $cart->id,
+        'order_id' => $order->id,
+        'status'   => $order->status,
+    ]);
+}
 
 public function showCart()
 {
