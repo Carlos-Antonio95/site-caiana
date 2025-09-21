@@ -36,6 +36,18 @@
                 <input id="email" type="email" name="email" value="{{ old('email') }}" required class="auth-input">
             </div>
 
+            {{-- Novo campo: Telefone --}}
+            <div class="mb-4">
+                <label for="phone">Telefone</label>
+                <input id="phone" type="text" name="phone" value="{{ old('phone') }}" required class="auth-input">
+            </div>
+
+            {{-- Novo campo: Data de nascimento --}}
+            <div class="mb-4">
+                <label for="date_birth">Data de Nascimento</label>
+                <input id="date_birth" type="date" name="date_birth" value="{{ old('date_birth') }}" required class="auth-input">
+            </div>
+
             <div class="mb-4">
                 <label for="password">Senha</label>
                 <input id="password" type="password" name="password" required class="auth-input">

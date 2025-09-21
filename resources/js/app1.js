@@ -172,12 +172,15 @@ function updateCartCount() {
 }
 
 // ===== Checkout mock =====
+
 els.checkout?.addEventListener("click", () => {
-  alert("✅ Pedido finalizado!");
-  cart = [];
-  saveCart();
-  renderCart();
+ // alert("✅ Pedido finalizado!");
+  //cart = [];
+  //saveCart();
+  //renderCart();
+   window.location.href = '/cart';
   closeDrawer();
+  
 });
 
 // ===== Footer year =====

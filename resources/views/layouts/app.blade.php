@@ -40,8 +40,5 @@
 
     <div class="backdrop" id="backdrop"></div>
 
-  <script src="{{ asset('js/cart.js') }}"></script>
-
-    <script src="{{ asset('js/app1.js') }}"></script>
 </body>
 </html>

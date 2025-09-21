@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use App\Models\CartItems;
 use App\Models\Cart_Items;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ class Carts extends Model
 
     protected $fillable = [
         'id_clients',
-        'token_session',
+         'session_id',
     ];
 
     /**

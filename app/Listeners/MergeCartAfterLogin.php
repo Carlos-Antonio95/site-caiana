@@ -3,25 +3,30 @@
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Authenticated;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use App\Models\Carts;
 
 class MergeCartAfterLogin
 {
     /**
      * Handle the event.
+     *
+     * @param  \Illuminate\Auth\Events\Authenticated  $event
+     * @return void
      */
-    public function handle(Authenticated $event): void
+    public function handle(Authenticated $event)
     {
         $user = $event->user;
 
-        // Busca carrinho temporário dessa sessão
-        $sessionCart = Carts::where('session_id', session()->getId())->get();
+        // Pega o ID da sessão atual ou gera um ID único se não existir
+        $sessionId = session()->getId() ?: uniqid();
 
-        foreach ($sessionCart as $item) {
-            $item->update([
-                'user_id' => $user->id,
-                'session_id' => null
+        // Atualiza os carrinhos que pertencem a essa sessão
+        Carts::where('session_id', $sessionId)
+            ->update([
+                'id_clients' => $user->id,
+                'session_id' => $sessionId,
             ]);
-        }
     }
 }

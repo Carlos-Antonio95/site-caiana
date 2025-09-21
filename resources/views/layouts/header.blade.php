@@ -9,6 +9,7 @@
             <a href="{{ route('index') }}" class="@yield('nav-index')">Início</a>
             <a href="{{ route('produtos') }}" class="@yield('nav-produtos')">Produtos</a>
             <a href="{{ route('promocoes') }}" class="@yield('nav-promocoes')">Promoções</a>
+            <a href="{{ route('cart.show') }}" class="@yield('nav-cart')">Carrinho</a>
             <a href="{{ route('contato') }}" class="@yield('nav-contato')">Contato</a>
         </nav>
 

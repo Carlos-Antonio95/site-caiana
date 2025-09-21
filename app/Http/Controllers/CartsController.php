@@ -8,6 +8,7 @@ use App\Models\Carts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Client;
+use App\Models\CartItems;
 class CartsController extends Controller
 {
     public function __construct()
@@ -44,7 +45,7 @@ class CartsController extends Controller
 
         $request->validate([
             'id_clients' => 'nullable|exists:clients,id',
-            'token_session' => 'required|string|max:100|unique:carts,token_session',
+            'session_id' => 'required|string|max:100|unique:carts,session_id',
         ]);
 
         Carts::create($request->all());
@@ -80,7 +81,7 @@ class CartsController extends Controller
 
         $request->validate([
             'id_clients' => 'nullable|exists:clients,id',
-            'token_session' => 'required|string|max:100|unique:carts,token_session,' . $cart->id,
+            'session_id' => 'required|string|max:100|unique:carts,session_id,' . $cart->id,
         ]);
 
         $cart->update($request->all());
@@ -107,4 +108,38 @@ class CartsController extends Controller
             abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
         }
     }
+
+public function checkout(Request $request)
+{
+    $user = Auth::user();
+    $items = $request->input('items', []);
+
+    if (empty($items)) {
+        return response()->json(['message' => 'Carrinho vazio'], 400);
+    }
+
+    // Cria o carrinho
+    $cart = Carts::create([
+        'id_clients' => $user->id,
+        'session_id' => session()->getId(),
+    ]);
+
+    // Cria os itens
+    foreach ($items as $item) {
+        CartItems::create([
+            'id_carts'    => $cart->id,
+            'id_products' => $item['id'],
+            'quantity'    => $item['qty'],
+            'price'       => $item['price'],
+            'session_id'  => $cart->session_id,
+        ]);
+    }
+
+        
+
+  return response()->json([
+        'message' => 'Pedido finalizado com sucesso!',
+        'cart_id' => $cart->id
+    ]);
+}
 }

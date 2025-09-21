@@ -14,6 +14,7 @@ class CartItems extends Model
         'id_products',
         'quantity',
         'price',
+        'session_id'
     ];
 
     /**

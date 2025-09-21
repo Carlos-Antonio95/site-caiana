@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('id_products')->references('id')->on('products')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('quantity')->default(1);   
             $table->decimal('price', 10, 2);
+            $table->string('session_id', 100)->nullable()->change();
             $table->timestamps();
         });
     }

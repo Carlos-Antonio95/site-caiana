@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_clients')->nullable();
             $table->foreign('id_clients')->references('id')->on('clients')->onUpdate('cascade')->onDelete('set null');
-            $table->string('session_id', 100);
+           $table->string('session_id', 100)->nullable()->change();
             $table->timestamps();
         });
     }
