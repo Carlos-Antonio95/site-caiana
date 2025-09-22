@@ -73,6 +73,25 @@ Route::middleware('auth')->group(function () {
         ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 });
 
+//======================== Pedidos ======================
+// Listar todos os pedidos (para teste)
+//Route::get('/test/orders', [OrdersController::class, 'index']);
+
+// Mostrar um pedido específico
+//Route::get('/test/orders/{order}', [OrdersController::class, 'show']);
+
+// Alterar status de um pedido 
+Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatus']);
+Route::view('/test-status', 'test-status'); // 'test-status' é o nome do arquivo blade sem .blade.php
+Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest']);
+
+
+// Rota de teste para alteração de status (sem autenticação)
+//Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest']);
+//Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest'])
+  //  ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+
 // ===================== API pública =====================
 Route::get('/api/products', [ProductsController::class, 'getAll'])->name('api.products');
 Route::get('/products', [ProductsController::class, 'apiIndex']);

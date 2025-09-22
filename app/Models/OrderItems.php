@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Orders;  
+use App\Models\Products_Variants;
+use App\Models\Products;
 class OrderItems extends Model
 
 {
@@ -33,4 +35,9 @@ class OrderItems extends Model
     {
         return $this->belongsTo(Products_Variants::class, 'id_variants');
     }
+    public function product()
+{
+    return $this->belongsTo(Products::class, 'id_products', 'id');
+}
+
 }
