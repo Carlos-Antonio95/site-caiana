@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
     $table->id(); 
     $table->unsignedBigInteger('id_order'); 
-    $table->unsignedBigInteger('id_variants'); 
-
-    $table->string('product_name', 150);
+    $table->unsignedBigInteger('id_variants')->nullable(); 
+    $table->unsignedBigInteger('id_product');
+    $table->string('title', 150);
     $table->decimal('price', 10, 2); 
     $table->integer('quantity');
     $table->timestamps();
@@ -25,6 +25,9 @@ return new class extends Migration
           ->onUpdate('cascade')->onDelete('cascade');
 
     $table->foreign('id_variants')->references('id')->on('product_variants')
+          ->onUpdate('cascade')->onDelete('cascade');
+
+    $table->foreign('id_product')->references('id')->on('products')
           ->onUpdate('cascade')->onDelete('cascade');
 });
 

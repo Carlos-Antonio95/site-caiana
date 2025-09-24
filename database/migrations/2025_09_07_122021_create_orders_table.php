@@ -12,17 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-              $table->id(); // 
-            $table->unsignedBigInteger('id_clients'); 
-            $table->unsignedBigInteger('id_addresses');
+    $table->id();
+    $table->unsignedBigInteger('id_clients');
+    $table->unsignedBigInteger('id_addresses');
+    $table->enum('status', ['pendente', 'pago', 'aprovado', 'enviado', 'entregue', 'cancelado'])->default('pendente');
+    $table->boolean('stock_decremented')->default(false);
+    $table->decimal('total_value', 10, 2);
+    $table->foreign('id_clients')->references('id')->on('clients')->onUpdate('cascade')->onDelete('cascade');
+    $table->foreign('id_addresses')->references('id')->on('addresses')->onUpdate('cascade')->onDelete('cascade');
+    $table->timestamps();
+});
 
-            $table->enum('status', ['pendente', 'pago', 'enviado', 'entregue', 'cancelado'])->default('pendente');
-
-            $table->decimal('total_value', 10, 2);
-            $table->foreign('id_clients')->references('id')->on('clients')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('id_addresses')->references('id')->on('addresses')->onUpdate('cascade')->onDelete('cascade');
-            $table->timestamps();
-        });
     }
 
     /**

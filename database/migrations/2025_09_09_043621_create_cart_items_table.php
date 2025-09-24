@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_products');
             $table->foreign('id_carts')->references('id')->on('carts')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('id_products')->references('id')->on('products')->onUpdate('cascade')->onDelete('cascade');
+            $table->string('title', 150)->nullable();
             $table->integer('quantity')->default(1);   
             $table->decimal('price', 10, 2);
             $table->string('session_id', 100)->nullable();

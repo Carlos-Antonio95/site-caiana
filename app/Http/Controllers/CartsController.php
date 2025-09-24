@@ -209,6 +209,7 @@ public function checkout(Request $request)
         $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
         OrderItems::create([
             'id_order'     => $order->id,
+            'id_product' => $item['id'],
             'id_variants'  => $item['variant_id'] ?? null, // se tiver variantes
             'title'       => $item['title'],
             'price'        => $item['price'],
