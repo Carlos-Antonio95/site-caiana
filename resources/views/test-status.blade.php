@@ -5,7 +5,7 @@
     <h1>Alterar Status do Pedido</h1>
 
     {{-- Formulário para atualizar status do pedido --}}
-    <form action="{{ url('/test/orders/9/status') }}" method="POST">
+    <form action="{{ url('/test/orders/1/status') }}" method="POST">
         @csrf {{-- Token CSRF obrigatório para POST --}}
         
         <label for="status">Novo Status:</label>

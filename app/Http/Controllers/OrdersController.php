@@ -178,35 +178,44 @@ class OrdersController  extends Controller
     $order->save();
 
     return redirect()->route('orders.show', $order)->with('success', 'Status atualizado com sucesso!');
-}*/
-public function changeStatusTest(Request $request, Orders $order)
+}*/public function changeStatusTest(Request $request, Orders $order)
 {
+    // Validação do status
     $request->validate([
         'status' => 'required|in:pendente,pago,aprovado,enviado,entregue,cancelado',
     ]);
 
     $newStatus = $request->input('status');
 
-    // Se status mudou para 'aprovado' e ainda não foi decrementado
-    if ($newStatus === 'aprovado' && !$order->stock_decremented) {
+    // Decrementa estoque se status mudou para 'aprovado' e ainda não foi decrementado
+    if (($newStatus === 'aprovado' || $newStatus === 'enviado' || $newStatus === 'entregue' || $newStatus === 'pago') && !$order->stock_decremented) {
         foreach ($order->items as $item) {
             $product = $item->product;
-            $product->quantity -= $item->quantity; // decrementa apenas uma vez
-            $product->save();
+            if ($product) {
+                $product->stock_quantity -= $item->quantity;
+                // Garante que estoque não fique negativo
+                if ($product->stock_quantity < 0) {
+                    $product->stock_quantity = 0;
+                }
+                $product->save();
+            }
         }
         $order->stock_decremented = true;
     }
 
-    // Se status mudou para 'cancelado' e antes estava aprovado, restaurar estoque
+    // Restaura estoque se status mudou para 'cancelado' e estoque já foi decrementado
     if ($newStatus === 'cancelado' && $order->stock_decremented) {
         foreach ($order->items as $item) {
             $product = $item->product;
-            $product->quantity += $item->quantity;
-            $product->save();
+            if ($product) {
+                $product->stock_quantity += $item->quantity;
+                $product->save();
+            }
         }
         $order->stock_decremented = false;
     }
 
+    // Atualiza status do pedido
     $order->status = $newStatus;
     $order->save();
 
