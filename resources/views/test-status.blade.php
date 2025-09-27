@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@title('CAIANA — Teste Status Pedido')
 <div class="container">
     <h1>Alterar Status do Pedido</h1>
 

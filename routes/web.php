@@ -21,6 +21,7 @@ Route::view('/promocoes', 'promocoes')->name('promocoes');
 Route::view('/contato', 'contato')->name('contato');
 Route::view('/painel', 'painel')->name('painel');
 
+
 Route::get('/login', function () {
     return view('login'); // mostra o formulário de login
 })->name('login');
@@ -72,6 +73,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/checkout', [CartsController::class, 'checkout'])
         ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 });
+// ===================== Promoções =====================
+Route::resource('promotions', PromotionsController::class);
+Route::resource('promotion_products', PromotionProductController::class);
+
+// Rotas adicionais
+Route::post('/promotions/create-promotion', [PromotionsController::class, 'store'])
+    ->name('promotions.index.create');
+Route::post('/promotions/add-product', [PromotionProductController::class, 'store'])
+    ->name('promotions.index.addProduct');
+
+
 
 //======================== Pedidos ======================
 // Listar todos os pedidos (para teste)
