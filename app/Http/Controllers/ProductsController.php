@@ -19,7 +19,7 @@ class ProductsController extends Controller
 
     // =================== JSON para front-end ===================
     /**
-     * Retornar todos os produtos em JSON para o front-end
+     * Retornar todos os produtos em JSON para o front
      */
     public function getAll()
     {
@@ -58,7 +58,7 @@ class ProductsController extends Controller
 
         $request->validate([
             'id_categories' => 'required|exists:categories,id',
-            'product_name' => 'required|string|max:150',
+            'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
@@ -89,7 +89,7 @@ class ProductsController extends Controller
 
         $request->validate([
             'id_categories' => 'required|exists:categories,id',
-            'product_name' => 'required|string|max:150',
+            'title' => 'required|string|max:150',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
@@ -101,6 +101,32 @@ class ProductsController extends Controller
         return redirect()->route('products.index')->with('success', 'Produto atualizado com sucesso!');
     }
 
+    public function updateStatus(Request $request, Products $product)
+    {
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'status' => 'required|in:ativo,inativo',
+        ]);
+
+        $product->update($request->only('status'));
+
+        return redirect()->route('products.index')->with('success', 'Status do produto atualizado com sucesso!');
+    }
+
+    public function updateStock(Request $request, Products $product)
+    {
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'stock_quantity' => 'required|integer|min:0',
+        ]);
+
+        $product->update($request->only('stock_quantity'));
+
+        return redirect()->route('products.index')->with('success', 'Quantidade em estoque atualizada com sucesso!');
+    }
+    
     public function destroy(Products $product)
     {
         $this->authorizeAdmin();

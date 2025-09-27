@@ -55,8 +55,8 @@ function applyFilters(list) {
 // ===== Render produtos =====
 function renderProducts() {
   if (!els.products) return;
-  const items = applyFilters(PRODUCTS);
-  els.products.innerHTML = items.map(p => `
+  const items = applyFilters(PRODUCTS).filter(p => p.status === 'ativo' && p.stock_quantity > 0 ); // Apenas ativos e com estoque
+  els.products.innerHTML = items.map(p =>`
     <article class="card" data-id="${p.id}">
       <img src="${p.images?.[0]?.image_path || 'assets/default.jpg'}" alt="${p.title}" />
       <h4>${p.title}</h4>

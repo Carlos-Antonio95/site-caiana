@@ -194,8 +194,11 @@ class OrdersController  extends Controller
             if ($product) {
                 $product->stock_quantity -= $item->quantity;
                 // Garante que estoque não fique negativo
-                if ($product->stock_quantity < 0) {
+                if ($product->stock_quantity <= 0) {
                     $product->stock_quantity = 0;
+                }
+                if ($product->stock_quantity == 0) {
+                    $product->status = 'inativo'; // Marca como inativo se estoque zerar
                 }
                 $product->save();
             }
