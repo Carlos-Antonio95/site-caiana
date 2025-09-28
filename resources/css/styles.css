@@ -32,6 +32,7 @@ body{
   color:var(--ink);
   background:linear-gradient(180deg, var(--bg), #c3ecff 60%);
 }
+.auth-wrapper { background-color: #c3ecff !important; }
 
 .container{width:min(1100px, 92%); margin:auto}
 .btn{
@@ -255,5 +256,133 @@ body{
     border-radius: 8px;
     margin-bottom: 1rem;
 }
+
+/* ------------------------
+   Estilo do Carrinho
+------------------------- */
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* Cabeçalhos */
+h1 {
+    font-size: 2rem;
+    text-align: center;
+    color: #2d3748;
+    margin-bottom: 25px;
+}
+
+h2, h3 {
+    color: #374151;
+    margin-bottom: 15px;
+}
+
+/* Caixa do carrinho */
+.cart {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Itens do carrinho */
+#cart-items {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+/* Total */
+.subtotal {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 20px;
+}
+
+/* Formulários */
+form {
+    margin-bottom: 20px;
+}
+
+form div {
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #4b5563;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    background: #fff;
+}
+
+input:focus, select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+/* Botões */
+button, .btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Botão principal */
+.btn-primary, #checkout {
+    background: #2563eb;
+    color: #fff;
+}
+.btn-primary:hover, #checkout:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(37,99,235,0.3);
+}
+
+/* Botão secundário */
+.btn-secondary, #btn-change-address, #btn-cep {
+    background: #e5e7eb;
+    color: #374151;
+}
+.btn-secondary:hover, #btn-change-address:hover, #btn-cep:hover {
+    background: #d1d5db;
+    transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    .cart {
+        padding: 15px;
+    }
+}
+
 
 
