@@ -7,8 +7,6 @@
     @vite(['resources/css/admin.css', 'resources/js/app.js'])
 
 
-    <script src="{{ asset('js/app.js') }}" defer></script>
-
     <style>
         body { display:flex; min-height:100vh; font-family: 'Poppins', sans-serif; margin:0; }
         .sidebar { width:250px; background:#365366; color:#fff; display:flex; flex-direction:column; }
@@ -22,6 +20,7 @@
     <aside class="sidebar">
     <h2>CAIANA Admin</h2>
     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+    <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Usuários</a>
     <a href="{{  route('admin.clients.index') }}" class="{{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">Clientes</a>
     <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Produtos</a>
     <a href="{{ route('admin.promotions.index') }}" class="{{ request()->routeIs('admin.promotions.*') ? 'active' : '' }}">Promoções</a>

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
-    UserController, ClientController, AddressesController, CategoriesController,
+    UsersController, ClientController, AddressesController, CategoriesController,
     ProductsController, ProductsVariantsController, PromotionsController,
     ProductsImagesController, PromotionProductController, ProductReviewsController,
     CouponsController, CartItemController, CartsController, OrdersController,
@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
 
     // CRUD geral protegido por auth
     Route::resources([
-        'users' => UserController::class,
+        'users' => UsersController::class,
         'clients' => ClientController::class,
         'addresses' => AddressesController::class,
         'categories' => CategoriesController::class,
@@ -115,7 +115,7 @@ Route::middleware('auth')->group(function () {
     ]);
 
     // Rotas extras CRUD
-    Route::put('/users/{user}/promote', [UserController::class, 'promoteToAdmin'])->name('users.promote');
+    Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
     Route::get('/product_variants/{product}/create', [ProductsVariantsController::class, 'create'])->name('product_variants.create');
     Route::get('/product_reviews/create/{id}', [ProductReviewsController::class, 'create'])->name('product_reviews.create');
     Route::post('/addresses', [AddressesController::class, 'store'])->name('addresses.store');
@@ -140,11 +140,12 @@ Route::prefix('admin')
             'promotions' => PromotionsController::class,
             'promotion-products' => PromotionProductController::class,
             'orders' => OrdersController::class,
-            'users' => UserController::class,
+            'users' => UsersController::class,
             'admin-activities' => AdminActivityController::class,
             'coupons' => CouponsController::class,
             'clients' => ClientController::class,
         ]);
+                Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
     });
 
 // ===================== Rotas API Pública =====================

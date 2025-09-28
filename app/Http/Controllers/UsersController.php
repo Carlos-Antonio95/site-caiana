@@ -1,49 +1,36 @@
 <?php
 
 namespace App\Http\Controllers;
-/** 
- * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
- */
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
-class UserController extends Controller
+class UsersController extends Controller
 {
-    // Middleware para proteger rotas
-     public function __construct()
+    public function __construct()
     {
-        // Middleware que protege todas as rotas do controller
         $this->middleware('auth');
     }
 
-    /**
-     * Listar todos os usuários.
-     * Apenas admin pode acessar.
-     */
+    // Listar usuários
     public function index()
     {
         $this->authorizeAdmin();
 
         $users = User::all();
-        return view('users.index', compact('users'));
+        return view('admin.users.index', compact('users'));
     }
 
-    /**
-     * Mostrar formulário para criar novo usuário.
-     * Apenas admin.
-     */
+    // Formulário criar usuário
     public function create()
     {
         $this->authorizeAdmin();
-        return view('users.create');
+        return view('admin.users.create');
     }
 
-    /**
-     * Salvar usuário no banco.
-     * Apenas admin.
-     */
+    // Salvar usuário
     public function store(Request $request)
     {
         $this->authorizeAdmin();
@@ -62,35 +49,24 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
 
-        return redirect()->route('users.index')->with('success', 'Usuário criado com sucesso!');
+        return redirect()->route('admin.users.index')->with('success', 'Usuário criado com sucesso!');
     }
 
-    /**
-     * Mostrar detalhes de um usuário.
-     * Admin vê todos, cliente só vê a si mesmo.
-     */
+    // Mostrar usuário
     public function show(User $user)
     {
         $this->authorizeUser($user);
-
-        return view('users.show', compact('user'));
+        return view('admin.users.show', compact('user'));
     }
 
-    /**
-     * Mostrar formulário de edição.
-     * Admin pode editar qualquer um, cliente só a si mesmo.
-     */
+    // Formulário editar usuário
     public function edit(User $user)
     {
         $this->authorizeUser($user);
-
-        return view('users.edit', compact('user'));
+        return view('admin.users.edit', compact('user'));
     }
 
-    /**
-     * sdjadjsadaskdl
-     * Atualizar usuário no banco.
-     */
+    // Atualizar usuário
     public function update(Request $request, User $user)
     {
         $this->authorizeUser($user);
@@ -102,40 +78,39 @@ class UserController extends Controller
             'role' => 'required|in:cliente,admin',
         ]);
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-        ];
-
-        if ($request->password) {
-            $data['password'] = Hash::make($request->password);
-        }
+        $data = $request->only(['name', 'email', 'role']);
+        if ($request->password) $data['password'] = Hash::make($request->password);
 
         $user->update($data);
 
-        return redirect()->route('users.index')->with('success', 'Usuário atualizado com sucesso!');
+        return redirect()->route('admin.users.index')->with('success', 'Usuário atualizado com sucesso!');
     }
 
-    /**
-     * Deletar usuário.
-     * Apenas admin.
-     */
+    // Deletar usuário
     public function destroy(User $user)
     {
         $this->authorizeAdmin();
-        // Impede que um admin se delete acidentalmente
+
         if (Auth::id() === $user->id) {
-            return redirect()->route('users.index')->with('error', 'Você não pode deletar a si mesmo.');
+            return redirect()->route('admin.users.index')->with('error', 'Você não pode deletar a si mesmo.');
         }
+
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'Usuário excluído com sucesso!');
+        return redirect()->route('admin.users.index')->with('success', 'Usuário excluído com sucesso!');
     }
 
-    /**
-     * Função para verificar se o usuário logado é admin.
-     */
+    // Promover usuário a admin
+    public function promoteToAdmin(User $user)
+    {
+        $this->authorizeAdmin();
+        $user->role = 'admin';
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('success', "$user->name agora é admin!");
+    }
+
+    // Verifica se o usuário logado é admin
     private function authorizeAdmin()
     {
         if (Auth::user()->role !== 'admin') {
@@ -143,29 +118,11 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Função para verificar se o usuário logado pode acessar este registro.
-     */
+    // Verifica se o usuário logado pode acessar este usuário
     private function authorizeUser(User $user)
     {
         if (Auth::user()->role !== 'admin' && Auth::id() !== $user->id) {
             abort(403, 'Acesso negado! Você não pode acessar este usuário.');
         }
     }
-
-    /**
- * Promove um usuário de cliente para admin.
- * Apenas admins podem executar.
- */
-public function promoteToAdmin(User $user)
-{
-    $this->authorizeAdmin(); // verifica se quem está logado é admin
-
-    $user->role = 'admin';
-    $user->save();
-
-    return redirect()->route('users.index')->with('success', $user->name . ' agora é admin!');
 }
-
-}
-
