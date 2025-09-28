@@ -1,46 +1,35 @@
 <?php
 
 namespace App\Http\Controllers;
-/** 
- * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
- */
+
 use App\Models\Carts;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Client;
 use App\Models\CartItems;
+use App\Models\Client;
 use App\Models\Addresses;
 use App\Models\Orders;
 use App\Models\OrderItems;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 class CartsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->except(['show']);
+        $this->middleware('auth');
     }
 
     /**
-     * Lista todos os carrinhos (apenas admin).
+     * Listar todos os carrinhos (admin).
      */
     public function index()
     {
         $this->authorizeAdmin();
-        $carts = Carts::with('client')->get();
+        $carts = Carts::with(['client', 'items'])->get();
         return view('admin.carts.index', compact('carts'));
     }
 
     /**
-     * Formulário para criar um carrinho (geralmente só sistema cria).
-     */
-    public function create()
-    {
-        $this->authorizeAdmin();
-        $clients = Client::all();
-        return view('admin.carts.create', compact('clients'));
-    }
-
-    /**
-     * Salva novo carrinho.
+     * Criar um carrinho (apenas admin ou sistema).
      */
     public function store(Request $request)
     {
@@ -51,32 +40,16 @@ class CartsController extends Controller
             'session_id' => 'required|string|max:100|unique:carts,session_id',
         ]);
 
-        Carts::create($request->all());
+        $cart = Carts::create($request->only('id_clients', 'session_id'));
 
-        return redirect()->route('admin.carts.index')->with('success', 'Carrinho criado com sucesso!');
+        return response()->json([
+            'message' => 'Carrinho criado com sucesso!',
+            'cart' => $cart
+        ]);
     }
 
     /**
-     * Mostra detalhes de um carrinho específico.
-     */
-    public function show(Carts $cart)
-    {
-        $cart->load(['client', 'items']);
-        return view('admin.carts.show', compact('cart'));
-    }
-
-    /**
-     * Formulário para editar um carrinho.
-     */
-    public function edit(Carts $cart)
-    {
-        $this->authorizeAdmin();
-        $clients = Client::all();
-        return view('admin.carts.edit', compact('cart', 'clients'));
-    }
-
-    /**
-     * Atualiza carrinho.
+     * Atualizar carrinho.
      */
     public function update(Request $request, Carts $cart)
     {
@@ -87,23 +60,138 @@ class CartsController extends Controller
             'session_id' => 'required|string|max:100|unique:carts,session_id,' . $cart->id,
         ]);
 
-        $cart->update($request->all());
+        $cart->update($request->only('id_clients', 'session_id'));
 
-        return redirect()->route('carts.index')->with('success', 'Carrinho atualizado com sucesso!');
+        return response()->json([
+            'message' => 'Carrinho atualizado com sucesso!',
+            'cart' => $cart
+        ]);
     }
 
     /**
-     * Remove carrinho.
+     * Remover carrinho.
      */
     public function destroy(Carts $cart)
     {
         $this->authorizeAdmin();
         $cart->delete();
-        return redirect()->route('admin.carts.index')->with('success', 'Carrinho removido com sucesso!');
+
+        return response()->json([
+            'message' => 'Carrinho removido com sucesso!'
+        ]);
     }
 
     /**
-     * Apenas admins podem manipular carrinhos diretamente.
+     * Checkout do carrinho.
+     */
+    public function checkout(Request $request)
+    {
+        $user = Auth::user();
+        $items = $request->input('items', []);
+        $addressId = $request->input('address_id');
+
+        if (empty($items)) {
+            return response()->json(['message' => 'Carrinho vazio'], 400);
+        }
+
+        if (!$addressId || !Addresses::where('id_clients', $user->id)->where('id', $addressId)->exists()) {
+            return response()->json(['message' => 'Endereço inválido'], 400);
+        }
+
+        $cart = Carts::create([
+            'id_clients' => $user->id,
+            'session_id' => session()->getId(),
+            'id_addresses' => $addressId
+        ]);
+
+        $total = 0;
+        foreach ($items as $item) {
+            CartItems::create([
+                'id_carts' => $cart->id,
+                'id_products' => $item['id'],
+                'quantity' => $item['qty'],
+                'price' => $item['price'],
+                'title' => $item['title'],
+                'session_id' => $cart->session_id,
+            ]);
+
+            $total += $item['price'] * $item['qty'];
+        }
+
+        $order = Orders::create([
+            'id_clients' => $user->id,
+            'id_addresses' => $addressId,
+            'status' => 'pendente',
+            'total_value' => $total,
+        ]);
+
+        foreach ($items as $item) {
+            $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
+            OrderItems::create([
+                'id_order' => $order->id,
+                'id_product' => $item['id'],
+                'id_variants' => $item['variant_id'] ?? null,
+                'title' => $item['title'],
+                'price' => $item['price'],
+                'quantity' => $quantity,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Pedido finalizado com sucesso!',
+            'cart_id' => $cart->id,
+            'order_id' => $order->id,
+            'status' => $order->status,
+        ]);
+    }
+
+    /**
+ * Editar carrinho (apenas admin)
+*/
+
+public function edit(Carts $cart)
+{
+    $this->authorizeAdmin();
+
+    $cart->load(['items']); // já carrega os itens do carrinho
+
+    // Carrega todos os clientes para popular o select
+    $clients = Client::all();
+
+    return view('admin.carts.edit', compact('cart', 'clients'));
+}
+
+
+    /**
+     * Mostrar carrinho do usuário.
+     */
+    public function showCart()
+{
+    $user = Auth::user();
+    $addresses = Addresses::where('id_clients', $user->id)->get();
+
+    // opcional: carregar os itens do carrinho do usuário
+    $cart = Carts::with('items.product')->where('id_clients', $user->id)->first();
+
+    return view('cart', compact('addresses', 'cart'));
+}
+
+    /**
+ * Mostrar detalhes de um carrinho específico (admin)
+ */
+public function show(Carts $cart)
+{
+    $this->authorizeAdmin();
+
+    // Carrega os itens do carrinho e cliente
+    $cart->load(['client', 'items.product']); // assumindo relação 'product' em CartItems
+
+    return view('admin.carts.show', compact('cart'));
+}
+
+
+    /**
+     * Apenas admins podem manipular diretamente os carrinhos.
      */
     private function authorizeAdmin()
     {
@@ -111,124 +199,4 @@ class CartsController extends Controller
             abort(403, 'Acesso negado! Apenas admins podem executar esta ação.');
         }
     }
-/*
-public function checkout(Request $request)
-{
-    $user = Auth::user();
-    $items = $request->input('items', []);
-    $addressId = $request->input('address_id');
-
-    if (empty($items)) {
-        return response()->json(['message' => 'Carrinho vazio'], 400);
-    }
-
-    if (!$addressId || !Addresses::where('id_clients', $user->id)->where('id', $addressId)->exists()) {
-        return response()->json(['message' => 'Endereço inválido'], 400);
-    }
-
-    // Cria o carrinho
-    $cart = Carts::create([
-        'id_clients' => $user->id,
-        'session_id' => session()->getId(),
-        'id_addresses' => $addressId // salva o endereço escolhido
-    ]);
-
-    // Cria os itens
-    foreach ($items as $item) {
-        CartItems::create([
-            'id_carts'    => $cart->id,
-            'id_products' => $item['id'],
-            'quantity'    => $item['qty'],
-            'price'       => $item['price'],
-            'title'       => $item['title'],
-            'session_id'  => $cart->session_id,
-        ]);
-    }
-
-    return response()->json([
-        'message' => 'Pedido finalizado com sucesso!',
-        'cart_id' => $cart->id
-    ]);
-}
-
-*/
-public function checkout(Request $request)
-{
-    $user = Auth::user();
-    $items = $request->input('items', []);
-    $addressId = $request->input('address_id');
-
-    if (empty($items)) {
-        return response()->json(['message' => 'Carrinho vazio'], 400);
-    }
-
-    if (!$addressId || !Addresses::where('id_clients', $user->id)->where('id', $addressId)->exists()) {
-        return response()->json(['message' => 'Endereço inválido'], 400);
-    }
-
-    // =========================
-    // 1. Criar o carrinho
-    // =========================
-    $cart = Carts::create([
-        'id_clients'   => $user->id,
-        'session_id'   => session()->getId(),
-        'id_addresses' => $addressId
-    ]);
-
-    // =========================
-    // 2. Criar os itens no carrinho
-    // =========================
-    $total = 0;
-    foreach ($items as $item) {
-        CartItems::create([
-            'id_carts'    => $cart->id,
-            'id_products' => $item['id'],
-            'quantity'    => $item['qty'],
-            'price'       => $item['price'],
-            'title'       => $item['title'],
-            'session_id'  => $cart->session_id,
-        ]);
-
-        $total += $item['price'] * $item['qty'];
-    }
-
-    // =========================
-    // 3. Criar o pedido (status pendente)
-    // =========================
-    $order = Orders::create([
-        'id_clients'   => $user->id,
-        'id_addresses' => $addressId,
-        'status'       => 'pendente',
-        'total_value'  => $total,
-    ]);
-
-    // =========================
-    // 4. Criar os itens do pedido
-    // =========================
-    foreach ($items as $item) {
-        $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
-        OrderItems::create([
-            'id_order'     => $order->id,
-            'id_product' => $item['id'],
-            'id_variants'  => $item['variant_id'] ?? null, // se tiver variantes
-            'title'       => $item['title'],
-            'price'        => $item['price'],
-            'quantity'     => $quantity,
-        ]);
-    }
-
-    return response()->json([
-        'message'  => 'Pedido finalizado com sucesso!',
-        'cart_id'  => $cart->id,
-        'order_id' => $order->id,
-        'status'   => $order->status,
-    ]);
-}
-
-public function showCart()
-{
-    $user = Auth::user();
-    $addresses = Addresses::where('id_clients', $user->id)->get(); // pega todos
-    return view('admin.cart', compact('addresses'));
-}
 }
