@@ -10,7 +10,7 @@
 <div class="container">
     <div class="card">
         <h2>Clientes</h2>
-        <a href="{{ route('clients.create') }}" class="btn btn-primary">+ Novo Cliente</a>
+        <a href="{{ route('admin.clients.create') }}" class="btn btn-primary">+ Novo Cliente</a>
 
         <table class="table">
             <thead>

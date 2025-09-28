@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('clients.store') }}" method="POST">
+        <form action="{{ route('admin.clients.store') }}" method="POST">
             @csrf
             <label>Nome Completo</label>
             <input type="text" name="full_name" class="form-control" required>
