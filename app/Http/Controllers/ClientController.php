@@ -30,7 +30,7 @@ class ClientController extends Controller
             $clients = Client::where('id_users', $user->id)->get();
         }
 
-        return view('clients.index', compact('clients'));
+        return view('admin.clients.index', compact('clients'));
     }
 
     /**
@@ -59,7 +59,7 @@ class ClientController extends Controller
             'date_birth' => $request->date_birth,
         ]);
 
-        return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso!');
+        return redirect()->route('admin.clients.index')->with('success', 'Cliente criado com sucesso!');
     }
 
     /**
@@ -69,7 +69,7 @@ class ClientController extends Controller
     {
         $this->authorizeClient($client);
 
-        return view('clients.show', compact('client'));
+        return view('admin.clients.show', compact('client'));
     }
 
     /**
@@ -79,7 +79,7 @@ class ClientController extends Controller
     {
         $this->authorizeClient($client);
 
-        return view('clients.edit', compact('client'));
+        return view('admin.clients.edit', compact('client'));
     }
 
     /**
@@ -97,7 +97,7 @@ class ClientController extends Controller
 
         $client->update($request->all());
 
-        return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso!');
+        return redirect()->route('admin.clients.index')->with('success', 'Cliente atualizado com sucesso!');
     }
 
     /**
@@ -110,7 +110,7 @@ class ClientController extends Controller
 
         $client->delete();
 
-        return redirect()->route('clients.index')->with('success', 'Cliente excluído com sucesso!');
+        return redirect()->route('admin.clients.index')->with('success', 'Cliente excluído com sucesso!');
     }
 
     /**

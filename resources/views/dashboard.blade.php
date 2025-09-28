@@ -1,16 +1,32 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+    @extends('layouts.admin')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <h1>olaola</h1>
-                <x-welcome />
+    @section('title', 'Dashboard')
+
+    @section('header')
+        Dashboard
+    @endsection
+
+    @section('content')
+        <div class="container">
+            <!-- Card Produtos -->
+            <div class="card">
+                <h2>Produtos</h2>
+                <p>Total: {{ \App\Models\Products::count() }}</p>
+                <a href="{{ route('admin.products.index') }}">Gerenciar</a>
+            </div>
+
+            <!-- Card Promoções -->
+            <div class="card">
+                <h2>Promoções</h2>
+                <p>Total: {{ \App\Models\Promotions::count() }}</p>
+                <a href="{{ route('admin.promotions.index') }}">Gerenciar</a>
+            </div>
+
+            <!-- Card Pedidos -->
+            <div class="card">
+                <h2>Pedidos</h2>
+                <p>Total: {{ \App\Models\Orders::count() }}</p>
+                <a href="{{ route('admin.orders.index') }}">Gerenciar</a>
             </div>
         </div>
-    </div>
-</x-app-layout>
+    @endsection
