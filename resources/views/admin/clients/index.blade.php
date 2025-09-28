@@ -16,8 +16,6 @@
             <thead>
                 <tr>
                     <th>Nome Completo</th>
-                    <th>Telefone</th>
-                    <th>Data de Nascimento</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -25,8 +23,6 @@
                 @forelse($clients as $client)
                     <tr>
                         <td>{{ $client->full_name }}</td>
-                        <td>{{ $client->phone }}</td>
-                        <td>{{ $client->date_birth }}</td>
                         <td>
                             <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Ver</a>
                             <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Editar</a>
