@@ -26,7 +26,7 @@ class CartsController extends Controller
     {
         $this->authorizeAdmin();
         $carts = Carts::with('client')->get();
-        return view('carts.index', compact('carts'));
+        return view('admin.carts.index', compact('carts'));
     }
 
     /**
@@ -36,7 +36,7 @@ class CartsController extends Controller
     {
         $this->authorizeAdmin();
         $clients = Client::all();
-        return view('carts.create', compact('clients'));
+        return view('admin.carts.create', compact('clients'));
     }
 
     /**
@@ -53,7 +53,7 @@ class CartsController extends Controller
 
         Carts::create($request->all());
 
-        return redirect()->route('carts.index')->with('success', 'Carrinho criado com sucesso!');
+        return redirect()->route('admin.carts.index')->with('success', 'Carrinho criado com sucesso!');
     }
 
     /**
@@ -62,7 +62,7 @@ class CartsController extends Controller
     public function show(Carts $cart)
     {
         $cart->load(['client', 'items']);
-        return view('carts.show', compact('cart'));
+        return view('admin.carts.show', compact('cart'));
     }
 
     /**
@@ -72,7 +72,7 @@ class CartsController extends Controller
     {
         $this->authorizeAdmin();
         $clients = Client::all();
-        return view('carts.edit', compact('cart', 'clients'));
+        return view('admin.carts.edit', compact('cart', 'clients'));
     }
 
     /**
@@ -99,7 +99,7 @@ class CartsController extends Controller
     {
         $this->authorizeAdmin();
         $cart->delete();
-        return redirect()->route('carts.index')->with('success', 'Carrinho removido com sucesso!');
+        return redirect()->route('admin.carts.index')->with('success', 'Carrinho removido com sucesso!');
     }
 
     /**
@@ -229,6 +229,6 @@ public function showCart()
 {
     $user = Auth::user();
     $addresses = Addresses::where('id_clients', $user->id)->get(); // pega todos
-    return view('cart', compact('addresses'));
+    return view('admin.cart', compact('addresses'));
 }
 }

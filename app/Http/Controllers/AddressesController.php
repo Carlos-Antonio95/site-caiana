@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AddressesController extends Controller
 {
+    // Aplica middleware 'auth' a todos os métodos
     public function __construct() {
         $this->middleware('auth');
     }
@@ -17,13 +18,16 @@ class AddressesController extends Controller
      */
     public function index()
     {
-        if(Auth::user()->role === 'admin'){
+        // Se for admin, mostra todos os endereços
+        if (Auth::user()->role === 'admin') {
             $addresses = Addresses::all();
         } else {
+            // Caso contrário, mostra apenas os do usuário logado
             $addresses = Addresses::where('id_clients', Auth::id())->get();
         }
 
-        return view('addresses.index', compact('addresses'));
+        // Passa os endereços para a view
+        return view('admin.addresses.index', compact('addresses'));
     }
 
     /**
@@ -31,75 +35,84 @@ class AddressesController extends Controller
      */
     public function create()
     {
-        return view('addresses.create');
+        return view('admin.addresses.create');
     }
 
     /**
      * Salvar endereço no banco
-     */public function store(Request $request)
-{
-    $request->validate([
-        'road' => 'required|string|max:200',
-        'number' => 'required|string|max:10',
-        'complement' => 'nullable|string|max:50',
-        'referenc' => 'nullable|string|max:200',
-        'neighborhood' => 'required|string|max:100',
-        'city' => 'required|string|max:100',
-        'state' => 'required|string|max:100',
-        'cep' => 'required|string|max:20',
-        'country' => 'required|string|max:100',
-    ]);
-
-    $address = Addresses::create([
-        'id_clients' => Auth::id(),
-        'road' => $request->road,
-        'number' => $request->number,
-        'complement' => $request->complement,
-        'referenc' => $request->referenc,
-        'neighborhood' => $request->neighborhood,
-        'city' => $request->city,
-        'state' => $request->state,
-        'cep' => $request->cep,
-        'country' => $request->country,
-    ]);
-
-    // Se a requisição for AJAX, retorna JSON
-    if ($request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Endereço criado com sucesso!',
-            'address' => $address
+     */
+    public function store(Request $request)
+    {
+        // Validação dos campos
+        $request->validate([
+            'road' => 'required|string|max:200',
+            'number' => 'required|string|max:10',
+            'complement' => 'nullable|string|max:50',
+            'referenc' => 'nullable|string|max:200',
+            'neighborhood' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'cep' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
         ]);
-    }
 
-    // Para requisições normais
-    return redirect()->back()->with('success', 'Endereço criado com sucesso.');
-}
+        // Cria o endereço no banco
+        $addresses = Addresses::create([
+            'id_clients' => Auth::id(),
+            'road' => $request->road,
+            'number' => $request->number,
+            'complement' => $request->complement,
+            'referenc' => $request->referenc,
+            'neighborhood' => $request->neighborhood,
+            'city' => $request->city,
+            'state' => $request->state,
+            'cep' => $request->cep,
+            'country' => $request->country,
+        ]);
+
+        // Retorna JSON se for requisição AJAX
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Endereço criado com sucesso!',
+                'addresses' => $addresses
+            ]);
+        }
+
+        // Redireciona para a mesma página com mensagem de sucesso
+        return redirect()->back()->with('success', 'Endereço criado com sucesso.');
+    }
 
     /**
      * Mostrar detalhes de um endereço
      */
-    public function show(Addresses $addresses)
+    public function show(Addresses $address)
     {
-        $this->authorizeAddress($addresses);
-        return view('addresses.show', compact('addresses'));
+        // Autoriza o acesso
+        $this->authorizeAddress($address);
+
+        // Passa a instância para a view
+        return view('admin.addresses.show', ['addresses' => $address]);
     }
 
     /**
      * Mostrar formulário de edição
      */
-    public function edit(Addresses $addresses)
+    public function edit(Addresses $address)
     {
-        $this->authorizeAddress($addresses);
-        return view('addresses.edit', compact('addresses'));
+        // Autoriza o acesso
+        $this->authorizeAddress($address);
+
+        // Passa a instância para a view
+        return view('admin.addresses.edit', ['addresses' => $address]);
     }
 
     /**
      * Atualizar endereço no banco
      */
-    public function update(Request $request, Addresses $addresses)
+    public function update(Request $request, Addresses $address)
     {
-        $this->authorizeAddress($addresses);
+        $this->authorizeAddress($address);
 
         $request->validate([
             'road' => 'required|string|max:200',
@@ -113,31 +126,37 @@ class AddressesController extends Controller
             'country' => 'required|string|max:100',
         ]);
 
-        $addresses->update($request->only([
+        // Atualiza apenas os campos permitidos
+        $address->update($request->only([
             'road', 'number', 'complement', 'referenc', 
             'neighborhood', 'city', 'state', 'cep', 'country'
         ]));
 
-        return redirect()->route('addresses.index')->with('success', 'Endereço atualizado com sucesso.');
+        return redirect()->route('admin.addresses.index')->with('success', 'Endereço atualizado com sucesso.');
     }
 
     /**
      * Deletar endereço
      */
-    public function destroy(Addresses $addresses)
+    public function destroy(Addresses $address)
     {
+        // Apenas admins podem deletar
         $this->authorizeAdmin();
-        $addresses->delete();
-        return redirect()->route('addresses.index')->with('success', 'Endereço deletado com sucesso.');
+
+        $address->delete();
+
+        return redirect()->route('admin.addresses.index')->with('success', 'Endereço deletado com sucesso.');
     }
 
     /**
      * Verifica se o usuário logado pode acessar este endereço
      */
-    private function authorizeAddress($addresses)
+    private function authorizeAddress($address)
     {
         $user = Auth::user();
-        if ($user->role !== 'admin' && $addresses->id_clients !== $user->id) {
+
+        // Se não for admin e o endereço não for do usuário logado, bloqueia
+        if ($user->role !== 'admin' && $address->id_clients !== $user->id) {
             abort(403, 'Acesso negado! Você não pode acessar este endereço.');
         }
     }

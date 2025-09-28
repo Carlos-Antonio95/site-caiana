@@ -36,7 +36,7 @@ class OrderItemsController extends Controller
                 ->get();
         }
 
-        return view('order_items.index', compact('items'));
+        return view('admin.order_items.index', compact('items'));
     }
 
     /**
@@ -49,7 +49,7 @@ class OrderItemsController extends Controller
         $orders = Orders::all();
         $variants = Products_Variants::all();
 
-        return view('order_items.create', compact('orders', 'variants'));
+        return view('ademin.order_items.create', compact('orders', 'variants'));
     }
 
     /**
@@ -69,7 +69,7 @@ class OrderItemsController extends Controller
 
         OrderItems::create($request->all());
 
-        return redirect()->route('order_items.index')->with('success', 'Item adicionado ao pedido!');
+        return redirect()->route('admin.order_items.index')->with('success', 'Item adicionado ao pedido!');
     }
 
     /**
@@ -92,7 +92,7 @@ class OrderItemsController extends Controller
         $orders = Orders::all();
         $variants = Products_Variants::all();
 
-        return view('order_items.edit', compact('orderItem', 'orders', 'variants'));
+        return view('admin.order_items.edit', compact('orderItem', 'orders', 'variants'));
     }
 
     /**
@@ -112,7 +112,7 @@ class OrderItemsController extends Controller
 
         $orderItem->update($request->all());
 
-        return redirect()->route('order_items.index')->with('success', 'Item atualizado com sucesso!');
+        return redirect()->route('admin.order_items.index')->with('success', 'Item atualizado com sucesso!');
     }
 
     /**
@@ -124,7 +124,7 @@ class OrderItemsController extends Controller
 
         $orderItem->delete();
 
-        return redirect()->route('order_items.index')->with('success', 'Item removido com sucesso!');
+        return redirect()->route('admin.order_items.index')->with('success', 'Item removido com sucesso!');
     }
 
     /**

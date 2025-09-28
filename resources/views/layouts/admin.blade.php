@@ -21,7 +21,9 @@
     <h2>CAIANA Admin</h2>
     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
     <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Usuários</a>
+    <a href="{{  route('admin.carts.index') }}" class="{{ request()->routeIs('admin.carts.*') ? 'active' : '' }}">Carrinhos</a>
     <a href="{{  route('admin.clients.index') }}" class="{{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">Clientes</a>
+    <a href="{{ route('admin.addresses.index') }}" class="{{ request()->routeIs('admin.addresses.*') ? 'active' : '' }}">Endereços</a>
     <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Produtos</a>
     <a href="{{ route('admin.promotions.index') }}" class="{{ request()->routeIs('admin.promotions.*') ? 'active' : '' }}">Promoções</a>
     <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Pedidos</a>

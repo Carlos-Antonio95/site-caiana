@@ -34,7 +34,7 @@ class OrdersController  extends Controller
                 ->get();
         }
 
-        return view('orders.index', compact('orders'));
+        return view('admin.orders.index', compact('orders'));
     }
 
     /**
@@ -46,7 +46,7 @@ class OrdersController  extends Controller
 
         $clients = Client::all();
         $addresses = Addresses::all();
-        return view('orders.create', compact('clients', 'addresses'));
+        return view('admin.orders.create', compact('clients', 'addresses'));
     }
 
     /**
@@ -65,7 +65,7 @@ class OrdersController  extends Controller
 
         Orders::create($request->all());
 
-        return redirect()->route('orders.index')->with('success', 'Pedido criado com sucesso!');
+        return redirect()->route('admin.orders.index')->with('success', 'Pedido criado com sucesso!');
     }
 
     /**
@@ -76,7 +76,7 @@ class OrdersController  extends Controller
         $this->authorizeClient($order);
 
         $order->load(['client', 'address', 'items']);
-        return view('orders.show', compact('order'));
+        return view('admin.orders.show', compact('order'));
     }
 
     /**
@@ -88,7 +88,7 @@ class OrdersController  extends Controller
 
         $clients = Client::all();
         $addresses = Addresses::all();
-        return view('orders.edit', compact('order', 'clients', 'addresses'));
+        return view('admin.orders.edit', compact('order', 'clients', 'addresses'));
     }
 
     /**
@@ -107,7 +107,7 @@ class OrdersController  extends Controller
 
         $order->update($request->all());
 
-        return redirect()->route('orders.index')->with('success', 'Pedido atualizado com sucesso!');
+        return redirect()->route('adminorders.index')->with('success', 'Pedido atualizado com sucesso!');
     }
 
     /**
@@ -119,7 +119,7 @@ class OrdersController  extends Controller
 
         $order->delete();
 
-        return redirect()->route('orders.index')->with('success', 'Pedido excluído com sucesso!');
+        return redirect()->route('admin.orders.index')->with('success', 'Pedido excluído com sucesso!');
     }
 
     /**

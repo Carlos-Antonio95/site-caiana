@@ -144,6 +144,10 @@ Route::prefix('admin')
             'admin-activities' => AdminActivityController::class,
             'coupons' => CouponsController::class,
             'clients' => ClientController::class,
+            'addresses' => AddressesController::class,
+            'carts' => CartsController::class,
+            'carts_items' => CartItemController::class,
+            'order_items' => OrderItemsController::class,
         ]);
                 Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
     });
@@ -155,4 +159,6 @@ Route::get('/products', [ProductsController::class, 'apiIndex']);
 // ===================== Rotas de Teste Pedidos =====================
 Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatus']);
 Route::view('/test-status', 'test-status');
-Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest']);
+Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest'])
+    ->name('admin.orders.changeStatusTest'); // Adicione este nome
+
