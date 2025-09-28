@@ -20,17 +20,32 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  margin:0;
+  font-family:Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color:var(--ink);
+  background:linear-gradient(#c3ecff 60%);
+  
 }
 
 main {
   flex: 1;
 }
 
-body{
-  margin:0;
-  font-family:Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color:var(--ink);
-  background:linear-gradient(180deg, var(--bg), #c3ecff 60%);
+.auth-wrapper { background-color: #c3ecff !important; }
+
+.site-footer {
+    padding: 0.5rem 0;         /* Reduz o espaço interno */
+    font-size: 0.85rem;        /* Diminui o tamanho da fonte */
+}
+
+.footer-inner {
+    padding: 0;                /* Remove padding extra, se houver */
+    min-height: 100px;          /* Altura mínima menor */
+}
+
+.site-footer .mini a {
+    font-size: 0.8em;          /* Links menores */
+    margin-left: 0.5rem;
 }
 .auth-wrapper { background-color: #c3ecff !important; }
 

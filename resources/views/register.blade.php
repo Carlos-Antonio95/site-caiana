@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="auth-wrapper">
     <div class="auth-card">
@@ -22,6 +21,7 @@
                 {{ session('status') }}
             </div>
         @endif
+        
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
@@ -68,4 +68,5 @@
         </form>
     </div>
 </div>
+
 @endsection
