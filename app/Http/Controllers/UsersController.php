@@ -88,6 +88,7 @@ class UserController extends Controller
     }
 
     /**
+     * sdjadjsadaskdl
      * Atualizar usuário no banco.
      */
     public function update(Request $request, User $user)
