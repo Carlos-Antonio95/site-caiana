@@ -41,7 +41,7 @@ class ProductsController extends Controller
     public function index()
     {
         $products = Products::with('category')->get();
-        return view('products.index', compact('products'));
+        return view('admin.products.index', compact('products'));
     }
 
     public function create()
@@ -49,7 +49,7 @@ class ProductsController extends Controller
         $this->authorizeAdmin();
 
         $categories = Categories::all();
-        return view('products.create', compact('categories'));
+        return view('admin.products.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -67,7 +67,7 @@ class ProductsController extends Controller
 
         Products::create($request->all());
 
-        return redirect()->route('products.index')->with('success', 'Produto criado com sucesso!');
+        return redirect()->route('admin.products.index')->with('success', 'Produto criado com sucesso!');
     }
 
     public function show(Products $product)
@@ -80,7 +80,7 @@ class ProductsController extends Controller
         $this->authorizeAdmin();
 
         $categories = Categories::all();
-        return view('products.edit', compact('product', 'categories'));
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
     public function update(Request $request, Products $product)
@@ -98,7 +98,7 @@ class ProductsController extends Controller
 
         $product->update($request->all());
 
-        return redirect()->route('products.index')->with('success', 'Produto atualizado com sucesso!');
+        return redirect()->route('admin.products.index')->with('success', 'Produto atualizado com sucesso!');
     }
 
     public function updateStatus(Request $request, Products $product)
@@ -111,7 +111,7 @@ class ProductsController extends Controller
 
         $product->update($request->only('status'));
 
-        return redirect()->route('products.index')->with('success', 'Status do produto atualizado com sucesso!');
+        return redirect()->route('admin.products.index')->with('success', 'Status do produto atualizado com sucesso!');
     }
 
     public function updateStock(Request $request, Products $product)
@@ -124,7 +124,7 @@ class ProductsController extends Controller
 
         $product->update($request->only('stock_quantity'));
 
-        return redirect()->route('products.index')->with('success', 'Quantidade em estoque atualizada com sucesso!');
+        return redirect()->route('admin.products.index')->with('success', 'Quantidade em estoque atualizada com sucesso!');
     }
     
     public function destroy(Products $product)
@@ -133,7 +133,7 @@ class ProductsController extends Controller
 
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Produto deletado com sucesso!');
+        return redirect()->route('admin.products.index')->with('success', 'Produto deletado com sucesso!');
     }
 
     private function authorizeAdmin()
