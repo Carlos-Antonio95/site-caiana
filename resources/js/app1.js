@@ -53,17 +53,24 @@ function applyFilters(list) {
 }
 
 // ===== Render produtos =====
+// ===== Render produtos =====
 function renderProducts() {
   if (!els.products) return;
-  const items = applyFilters(PRODUCTS).filter(p => p.status === 'ativo' && p.stock_quantity > 0 ); // Apenas ativos e com estoque
-  els.products.innerHTML = items.map(p =>`
+  const items = applyFilters(PRODUCTS).filter(p => p.status === 'ativo' && p.stock_quantity > 0 );
+
+  els.products.innerHTML = items.map(p => {
+    const hasDiscount = p.final_price && p.final_price < p.price;
+    return `
     <article class="card" data-id="${p.id}">
       <img src="${p.images?.[0]?.image_path || 'assets/default.jpg'}" alt="${p.title}" />
       <h4>${p.title}</h4>
-      <div class="price">${BRL(p.price)}</div>
+      <div class="price">
+        ${hasDiscount ? `<span style="text-decoration: line-through; color: #999;">${BRL(p.price)}</span> <span style="color: red; font-weight: bold;">${BRL(p.final_price)}</span>` : BRL(p.price)}
+      </div>
       <button class="btn btn-dark add-cart">Adicionar ao carrinho</button>
     </article>
-  `).join("");
+    `;
+  }).join("");
 
   document.querySelectorAll(".add-cart").forEach(btn => {
     btn.addEventListener("click", e => {
@@ -72,6 +79,7 @@ function renderProducts() {
     });
   });
 }
+
 
 // ===== Filtros =====
 // Busca
@@ -109,6 +117,7 @@ function addToCart(id) {
       id: prod.id,
       title: prod.title,
       price: prod.price,
+      final_price: prod.final_price, // 👈 adiciona aqui
       img: prod.images?.[0]?.image_path || 'assets/default.jpg',
       qty: 1
     });
@@ -118,24 +127,33 @@ function addToCart(id) {
   openDrawer();
 }
 
+
+// ===== Render carrinho =====
 function renderCart() {
   if (!els.cartItems) return;
-  els.cartItems.innerHTML = cart.length ? cart.map(i => `
-    <div class="cart-item" data-id="${i.id}">
-      <img src="${i.img}" alt="${i.title}" />
-      <div class="meta">
-        <strong>${i.title}</strong><br/>
-        <small>${BRL(i.price)}</small>
+  els.cartItems.innerHTML = cart.length ? cart.map(i => {
+    const hasDiscount = i.final_price && i.final_price < i.price;
+    return `
+      <div class="cart-item" data-id="${i.id}">
+        <img src="${i.img}" alt="${i.title}" />
+        <div class="meta">
+          <strong>${i.title}</strong><br/>
+          <small>
+            ${hasDiscount 
+              ? `<span style="text-decoration: line-through; color: #999;">${BRL(i.price)}</span> <span style="color: red; font-weight: bold;">${BRL(i.final_price)}</span>` 
+              : BRL(i.price)}
+          </small>
+        </div>
+        <div class="qty">
+          <button class="dec">-</button>
+          <span>${i.qty}</span>
+          <button class="inc">+</button>
+        </div>
       </div>
-      <div class="qty">
-        <button class="dec">-</button>
-        <span>${i.qty}</span>
-        <button class="inc">+</button>
-      </div>
-    </div>
-  `).join("") : "<p>Seu carrinho está vazio.</p>";
+    `;
+  }).join("") : "<p>Seu carrinho está vazio.</p>";
 
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
   if (els.subtotal) els.subtotal.textContent = BRL(subtotal);
   updateCartCount();
 

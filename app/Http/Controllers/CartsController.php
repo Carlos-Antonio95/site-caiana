@@ -10,6 +10,7 @@ use App\Models\Orders;
 use App\Models\OrderItems;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Products;
 
 class CartsController extends Controller
 {
@@ -103,40 +104,48 @@ class CartsController extends Controller
             'session_id' => session()->getId(),
             'id_addresses' => $addressId
         ]);
+$total = 0;
+foreach ($items as $item) {
+    // Buscar o produto e calcular o preço final
+    $product = Products::find($item['id']);
+    if (!$product) continue;
 
-        $total = 0;
-        foreach ($items as $item) {
-            CartItems::create([
-                'id_carts' => $cart->id,
-                'id_products' => $item['id'],
-                'quantity' => $item['qty'],
-                'price' => $item['price'],
-                'title' => $item['title'],
-                'session_id' => $cart->session_id,
-            ]);
+    $price = $product->final_price; // usa o accessor que calcula promoção
 
-            $total += $item['price'] * $item['qty'];
-        }
+    CartItems::create([
+        'id_carts' => $cart->id,
+        'id_products' => $product->id,
+        'quantity' => $item['qty'],
+        'price' => $price, // aqui vai o preço final
+        'title' => $product->title,
+        'session_id' => $cart->session_id,
+    ]);
 
-        $order = Orders::create([
-            'id_clients' => $user->id,
-            'id_addresses' => $addressId,
-            'status' => 'pendente',
-            'total_value' => $total,
-        ]);
+    $total += $price * $item['qty'];
+}
 
-        foreach ($items as $item) {
-            $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
-            OrderItems::create([
-                'id_order' => $order->id,
-                'id_product' => $item['id'],
-                'id_variants' => $item['variant_id'] ?? null,
-                'title' => $item['title'],
-                'price' => $item['price'],
-                'quantity' => $quantity,
-            ]);
-        }
+$order = Orders::create([
+    'id_clients' => $user->id,
+    'id_addresses' => $addressId,
+    'status' => 'pendente',
+    'total_value' => $total,
+]);
 
+foreach ($items as $item) {
+    $product = Products::find($item['id']);
+    if (!$product) continue;
+
+    $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
+
+    OrderItems::create([
+        'id_order' => $order->id,
+        'id_product' => $product->id,
+        'id_variants' => $item['variant_id'] ?? null,
+        'title' => $product->title,
+        'price' => $product->final_price, // preço com desconto
+        'quantity' => $quantity,
+    ]);
+}
         return response()->json([
             'message' => 'Pedido finalizado com sucesso!',
             'cart_id' => $cart->id,

@@ -22,7 +22,7 @@ class PromotionsController extends Controller
     public function index()
     {
         $promotions = Promotions::all();
-        return view('promotions.index', compact('promotions'));
+        return view('admin.promotions.index', compact('promotions'));
     }
 
     /**
@@ -31,7 +31,7 @@ class PromotionsController extends Controller
     public function create()
     {
         $this->authorizeAdmin();
-        return view('promotions.create');
+        return view('admin.promotions.create');
     }
 
     /**
@@ -52,7 +52,7 @@ class PromotionsController extends Controller
 
         Promotions::create($request->all());
 
-        return redirect()->route('promotions.index')->with('success', 'Promoção criada com sucesso!');
+        return redirect()->route('admin.promotions.index')->with('success', 'Promoção criada com sucesso!');
     }
 
     /**
@@ -60,7 +60,7 @@ class PromotionsController extends Controller
      */
     public function show(Promotions $promotion)
     {
-        return view('promotions.show', compact('promotion'));
+        return view('admin.promotions.show', compact('promotion'));
     }
 
     /**
@@ -69,7 +69,7 @@ class PromotionsController extends Controller
     public function edit(Promotions $promotion)
     {
         $this->authorizeAdmin();
-        return view('promotions.edit', compact('promotion'));
+        return view('admin.promotions.edit', compact('promotion'));
     }
 
     /**
@@ -90,7 +90,7 @@ class PromotionsController extends Controller
 
         $promotion->update($request->all());
 
-        return redirect()->route('promotions.index')->with('success', 'Promoção atualizada com sucesso!');
+        return redirect()->route('admin.promotions.index')->with('success', 'Promoção atualizada com sucesso!');
     }
 
     /**
@@ -102,7 +102,7 @@ class PromotionsController extends Controller
 
         $promotion->delete();
 
-        return redirect()->route('promotions.index')->with('success', 'Promoção deletada com sucesso!');
+        return redirect()->route('admin.promotions.index')->with('success', 'Promoção deletada com sucesso!');
     }
 
     /**

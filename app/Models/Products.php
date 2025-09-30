@@ -20,26 +20,29 @@ class Products extends Model
     ];
 
     // Preço final do produto (considerando promoções)
-    public function getFinalPriceAttribute()
-    {
-        $promotion = PromotionProduct::with('promotion')
-            ->where('id_products', $this->id)
-            ->whereHas('promotion', function ($q) {
-                $q->valid();
-            })
-            ->first();
+   public function getFinalPriceAttribute()
+{
+    // Se tiver desconto em porcentagem
+    $promotionProduct = PromotionProduct::with('promotion')
+        ->where('id_products', $this->id)
+        ->whereHas('promotion', function($q) {
+            $q->valid();
+        })
+        ->first();
 
-        if ($promotion) {
-            if ($promotion->percentage_discount) {
-                return $this->price * (1 - ($promotion->percentage_discount / 100));
-            }
-            if ($promotion->promotional_price) {
-                return $promotion->promotional_price;
-            }
+        // Se tiver preço promocional fixo
+    if ($promotionProduct) {
+        if ($promotionProduct->percentage_discount) {
+            return round($this->price * (1 - $promotionProduct->percentage_discount / 100), 2);
         }
-
-        return $this->price; // sem desconto
+        if ($promotionProduct->promotional_price) {
+            return $promotionProduct->promotional_price;
+        }
     }
+
+    return $this->price; // preço normal se não houver promoção
+}
+
 
     /**
      * Relação com categoria

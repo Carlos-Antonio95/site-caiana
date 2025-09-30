@@ -25,11 +25,34 @@ class PromotionProductController extends Controller
      * Exibe a lista de todas as promoções aplicadas aos produtos.
      * Inclui relações com 'promotion' e 'product' para mostrar detalhes.
      */
-    public function index()
-    {
-        $items = PromotionProduct::with(['promotion', 'product'])->get();
-        return view('promotion_products.index', compact('items'));
+    public function index(Request $request)
+{
+    $query = PromotionProduct::with(['promotion', 'product']);
+
+    // Filtros
+    if ($request->filled('product_id')) {
+        $query->where('id_products', $request->product_id);
     }
+
+    if ($request->filled('promotion_id')) {
+        $query->where('id_promotions', $request->promotion_id);
+    }
+
+    if ($request->filled('active')) {
+        $query->whereHas('promotion', function($q) use ($request) {
+            $q->where('active', $request->active);
+        });
+    }
+
+    $items = $query->get();
+
+    // Para popular selects de filtro
+    $products = Products::all();
+    $promotions = Promotions::all();
+
+    return view('admin.promotion_products.index', compact('items', 'products', 'promotions'));
+}
+
 
     /**
      * Exibe o formulário para criar uma nova promoção de produto.
@@ -43,7 +66,7 @@ class PromotionProductController extends Controller
         $promotions = Promotions::all();
         $products = Products::all();
 
-        return view('promotion_products.create', compact('promotions', 'products'));
+        return view('admin.promotion_products.create', compact('promotions', 'products'));
     }
 
     /**
@@ -65,7 +88,7 @@ class PromotionProductController extends Controller
         // Cria o registro no banco
         PromotionProduct::create($request->all());
 
-        return redirect()->route('promotion_products.index')
+        return redirect()->route('admin.promotion_products.index')
             ->with('success', 'Promoção aplicada ao produto com sucesso!');
     }
 
@@ -74,7 +97,7 @@ class PromotionProductController extends Controller
      */
     public function show(PromotionProduct $promotionProduct)
     {
-        return view('promotion_products.show', compact('promotionProduct'));
+        return view('admin.promotion_products.show', compact('promotionProduct'));
     }
 
     /**
@@ -111,7 +134,7 @@ class PromotionProductController extends Controller
         // Atualiza o registro
         $promotionProduct->update($request->all());
 
-        return redirect()->route('promotion_products.index')
+        return redirect()->route('admin.promotion_products.index')
             ->with('success', 'Promoção do produto atualizada com sucesso!');
     }
 
@@ -125,7 +148,7 @@ class PromotionProductController extends Controller
 
         $promotionProduct->delete();
 
-        return redirect()->route('promotion_products.index')
+        return redirect()->route('admin.promotion_products.index')
             ->with('success', 'Promoção do produto removida com sucesso!');
     }
 

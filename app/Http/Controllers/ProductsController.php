@@ -22,13 +22,27 @@ class ProductsController extends Controller
      * Retornar todos os produtos em JSON para o front
      */
     public function getAll()
-    {
-        // Pega produtos com a categoria e imagens
-        $products = Products::with(['category', 'images'])->get();
+{
+    $products = Products::with(['category', 'images'])->get();
 
-        // Retorna JSON
-        return response()->json($products);
-    }
+    // Adiciona final_price
+    $products = $products->map(function($p) {
+        return [
+            'id' => $p->id,
+            'title' => $p->title,
+            'description' => $p->description,
+            'price' => $p->price,
+            'final_price' => $p->final_price, // aqui
+            'stock_quantity' => $p->stock_quantity,
+            'status' => $p->status,
+            'category' => $p->category,
+            'images' => $p->images
+        ];
+    });
+
+    return response()->json($products);
+}
+
 
     public function apiIndex()
 {

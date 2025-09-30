@@ -138,7 +138,7 @@ Route::prefix('admin')
         Route::resources([
             'products' => ProductsController::class,
             'promotions' => PromotionsController::class,
-            'promotion-products' => PromotionProductController::class,
+            'promotion_products' => PromotionProductController::class,
             'orders' => OrdersController::class,
             'users' => UsersController::class,
             'admin-activities' => AdminActivityController::class,
