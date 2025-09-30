@@ -15,6 +15,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>Imagem</th>
                     <th>Título</th>
                     <th>Categoria</th>
                     <th>Preço</th>
@@ -26,6 +27,17 @@
             <tbody>
                 @forelse($products as $product)
                     <tr>
+                        <td>
+                            @php
+                                $image = $product->images->first(); // pega a primeira imagem
+                            @endphp
+                            @if($image)
+                                <img src="{{ asset($image->image_path) }}" alt="{{ $product->title }}" width="60">
+                            @else
+                                <img src="{{ asset($product->images->first()->image_path ?? 'assets/default.jpg') }}" 
+                                 alt="{{ $product->title }}" width="80">
+                            @endif
+                        </td>
                         <td>{{ $product->title }}</td>
                         <td>{{ $product->category->category_name ?? '-' }}</td>
                         <td>R$ {{ number_format($product->price, 2, ',', '.') }}</td>
@@ -41,7 +53,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6">Nenhum produto encontrado.</td></tr>
+                    <tr><td colspan="7">Nenhum produto encontrado.</td></tr>
                 @endforelse
             </tbody>
         </table>

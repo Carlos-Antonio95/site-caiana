@@ -21,7 +21,7 @@ class ProductsImagesController extends Controller
     public function index()
     {
         $images = Products_Images::with('product')->get();
-        return view('product_images.index', compact('images'));
+        return view('admin.product_images.index', compact('images'));
     }
 
     /**
@@ -94,13 +94,20 @@ class ProductsImagesController extends Controller
      * Deletar imagem
      */
     public function destroy(Products_Images $productImage)
-    {
-        $this->authorizeAdmin();
+{
+    $this->authorizeAdmin();
 
-        $productImage->delete();
-
-        return redirect()->route('product_images.index')->with('success', 'Imagem deletada com sucesso!');
+    // Deletar arquivo físico se existir
+    if (file_exists(public_path($productImage->image_path))) {
+        @unlink(public_path($productImage->image_path));
     }
+
+    // Deletar registro do banco
+    $productImage->delete();
+
+    return redirect()->route('product_images.index')->with('success', 'Imagem deletada com sucesso!');
+}
+
 
     /**
      * Verifica se usuário logado é admin

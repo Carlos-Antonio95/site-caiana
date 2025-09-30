@@ -9,14 +9,14 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('admin.products.store') }}" method="POST">
-            @csrf
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
 
             <label>Categoria</label>
             <select name="id_categories" class="form-control" required>
                 <option value="">Selecione</option>
                 @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                 @endforeach
             </select>
 
@@ -25,7 +25,6 @@
 
             <label>Descrição</label>
             <textarea name="description" class="form-control"></textarea>
-
             <label>Preço</label>
             <input type="number" step="0.01" name="price" class="form-control" required>
 
@@ -37,6 +36,10 @@
                 <option value="ativo">Ativo</option>
                 <option value="inativo">Inativo</option>
             </select>
+
+            <label>Imagem principal</label>
+        <input type="file" name="image" class="form-control" accept="image/*">
+
 
             <button type="submit" class="btn btn-success">Salvar</button>
             <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Voltar</a>

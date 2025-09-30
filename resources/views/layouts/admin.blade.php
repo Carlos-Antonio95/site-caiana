@@ -24,6 +24,7 @@
     <a href="{{  route('admin.carts.index') }}" class="{{ request()->routeIs('admin.carts.*') ? 'active' : '' }}">Carrinhos</a>
     <a href="{{  route('admin.clients.index') }}" class="{{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">Clientes</a>
     <a href="{{ route('admin.addresses.index') }}" class="{{ request()->routeIs('admin.addresses.*') ? 'active' : '' }}">Endereços</a>
+    <a href="{{ route('admin.products_images.index') }}" class="{{ request()->routeIs('admin.products_images.*') ? 'active' : '' }}">Imagens dos Produtos</a>
     <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Produtos</a>
     <a href="{{ route('admin.promotions.index') }}" class="{{ request()->routeIs('admin.promotions.*') ? 'active' : '' }}">Promoções</a>
     <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Pedidos</a>

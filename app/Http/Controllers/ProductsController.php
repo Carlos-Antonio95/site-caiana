@@ -53,22 +53,44 @@ class ProductsController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $this->authorizeAdmin();
+{
+    $this->authorizeAdmin();
 
-        $request->validate([
-            'id_categories' => 'required|exists:categories,id',
-            'title' => 'required|string|max:150',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'status' => 'required|in:ativo,inativo',
-        ]);
+    $request->validate([
+        'id_categories'   => 'required|exists:categories,id',
+        'title'           => 'required|string|max:150',
+        'description'     => 'nullable|string',
+        'price'           => 'required|numeric|min:0',
+        'stock_quantity'  => 'required|integer|min:0',
+        'status'          => 'required|in:ativo,inativo',
+    ]);
 
-        Products::create($request->all());
+    // cria só com os campos da tabela products
+    $product = Products::create($request->only([
+        'id_categories',
+        'title',
+        'description',
+        'price',
+        'stock_quantity',
+        'status',
+    ]));
 
-        return redirect()->route('admin.products.index')->with('success', 'Produto criado com sucesso!');
-    }
+    // se tiver imagem no request, salva em products_images
+    if ($request->hasFile('image')) {
+    $path = $request->file('image')->store('assets', 'public');
+
+    \App\Models\Products_Images::create([
+        'id_products' => $product->id,
+        'image_path'  => 'storage/' . $path, // correto para acessar em <img src="{{ asset(...) }}">
+        'is_primary'  => true,
+    ]);
+}
+
+
+    return redirect()->route('admin.products.index')->with('success', 'Produto criado com sucesso!');
+}
+
+
 
     public function show(Products $product)
     {
@@ -84,22 +106,53 @@ class ProductsController extends Controller
     }
 
     public function update(Request $request, Products $product)
-    {
-        $this->authorizeAdmin();
+{
+    $this->authorizeAdmin();
 
-        $request->validate([
-            'id_categories' => 'required|exists:categories,id',
-            'title' => 'required|string|max:150',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'status' => 'required|in:ativo,inativo',
-        ]);
+    $request->validate([
+        'id_categories' => 'required|exists:categories,id',
+        'title' => 'required|string|max:150',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric|min:0',
+        'stock_quantity' => 'required|integer|min:0',
+        'status' => 'required|in:ativo,inativo',
+        'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // valida nova imagem
+    ]);
 
-        $product->update($request->all());
+    // Atualiza dados do produto
+    $product->update($request->only([
+        'id_categories',
+        'title',
+        'description',
+        'price',
+        'stock_quantity',
+        'status',
+    ]));
 
-        return redirect()->route('admin.products.index')->with('success', 'Produto atualizado com sucesso!');
+    // Se enviou nova imagem, substitui a principal
+    if ($request->hasFile('image_path')) {
+        $file = $request->file('image_path');
+        $path = $file->store('products', 'public'); // storage/app/public/products
+
+        $image = $product->images->first(); // pega a primeira imagem
+
+        if ($image) {
+            // opcional: deletar a imagem antiga do storage
+            if (file_exists(public_path($image->image_path))) {
+                @unlink(public_path($image->image_path));
+            }
+            $image->update(['image_path' => 'storage/' . $path]);
+        } else {
+            $product->images()->create([
+                'image_path' => 'storage/' . $path,
+                'is_primary' => true,
+            ]);
+        }
     }
+
+    return redirect()->route('admin.products.index')->with('success', 'Produto atualizado com sucesso!');
+}
+
 
     public function updateStatus(Request $request, Products $product)
     {

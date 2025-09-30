@@ -148,6 +148,7 @@ Route::prefix('admin')
             'carts' => CartsController::class,
             'cart_items' => CartItemController::class,
             'order_items' => OrderItemsController::class,
+            'products_images' => ProductsImagesController::class,
         ]);
                 Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
     });

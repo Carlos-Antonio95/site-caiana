@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +12,7 @@ class Products extends Model
 
     protected $fillable = [
         'id_categories',
-        'product_name',
+        'title',
         'description',
         'price',
         'stock_quantity',
@@ -23,10 +22,9 @@ class Products extends Model
     // Preço final do produto (considerando promoções)
     public function getFinalPriceAttribute()
     {
-        // pega promoções válidas
         $promotion = PromotionProduct::with('promotion')
             ->where('id_products', $this->id)
-            ->whereHas('promotion', function($q) {
+            ->whereHas('promotion', function ($q) {
                 $q->valid();
             })
             ->first();
@@ -42,7 +40,7 @@ class Products extends Model
 
         return $this->price; // sem desconto
     }
-    
+
     /**
      * Relação com categoria
      */
@@ -50,8 +48,9 @@ class Products extends Model
     {
         return $this->belongsTo(Categories::class, 'id_categories');
     }
+
     public function images()
-{
-    return $this->hasMany(Products_Images::class, 'id_products');
-}
+    {
+        return $this->hasMany(Products_Images::class, 'id_products');
+    }
 }
