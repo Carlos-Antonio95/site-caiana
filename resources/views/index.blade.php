@@ -24,13 +24,14 @@
             <h3>Filtros</h3>
             <div class="filter-block">
                 <label class="lbl">Categoria</label>
-                <div class="chips" id="chip-categorias">
-                    <button class="chip is-active" data-category="tudo">Tudo</button>
-                    <button class="chip" data-category="vestidos">Vestidos</button>
-                    <button class="chip" data-category="saias">Saias</button>
-                    <button class="chip" data-category="shorts">Shorts</button>
-                    <button class="chip" data-category="blusas">Blusas</button>                  
-                </div>
+              <div class="chips" id="chip-categorias">
+            <button class="chip is-active" data-category="tudo">Tudo</button>
+            @foreach($categories as $category)
+                <button class="chip" data-category="{{ strtolower($category->category_name) }}">
+                    {{ $category->category_name }}
+                </button>
+            @endforeach
+        </div>
             </div>
 
             <div class="filter-block">

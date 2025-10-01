@@ -16,9 +16,10 @@ use App\Http\Controllers\Auth\{
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
+use App\Http\Controllers\HomeController;
 // ===================== Rotas Públicas =====================
-Route::view('/', 'index')->name('index');
+Route::get('/', [HomeController::class, 'index'])->name('index');
+//Route::view('/', 'index')->name('index');
 Route::view('/produtos', 'produtos')->name('produtos');
 Route::view('/promocoes', 'promocoes')->name('promocoes');
 Route::view('/contato', 'contato')->name('contato');

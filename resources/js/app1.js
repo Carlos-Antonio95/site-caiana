@@ -90,15 +90,14 @@ els.search?.addEventListener("input", e => {
 
 // Categoria
 els.chipCategorias?.querySelectorAll(".chip").forEach(chip => {
-  chip.addEventListener("click", e => {
-    // Remove ativo
-    els.chipCategorias.querySelectorAll(".chip").forEach(c => c.classList.remove("is-active"));
-    // Marca selecionado
-    e.target.classList.add("is-active");
-    filters.category = e.target.dataset.category.toLowerCase();
-    renderProducts();
-  });
+    chip.addEventListener("click", e => {
+        els.chipCategorias.querySelectorAll(".chip").forEach(c => c.classList.remove("is-active"));
+        e.target.classList.add("is-active");
+        filters.category = e.target.dataset.category.toLowerCase();
+        renderProducts();
+    });
 });
+
 
 // Preço
 els.preco?.addEventListener("input", e => {
