@@ -33,12 +33,20 @@
                         <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
                     </form>
                     @if($user->role !== 'admin')
-                    <form action="{{ route('users.promote', $user->id) }}" method="POST" style="display:inline-block;">
+                    <form action="{{ route('admin.users.promote', $user->id) }}" method="POST" style="display:inline-block;">
                         @csrf
                         @method('PUT')
                         <button type="submit" class="btn btn-sm btn-success">Promover Admin</button>
                     </form>
                     @endif
+                                    @if($user->role === 'admin' && Auth::id() !== $user->id)
+                <form action="{{ route('admin.users.demote', $user->id) }}" method="POST" style="display:inline-block;">
+                    @csrf
+                    @method('PUT')
+                    <button type="submit" class="btn btn-sm btn-secondary">Rebaixar para Cliente</button>
+                </form>
+                @endif
+
                 </td>
             </tr>
             @endforeach

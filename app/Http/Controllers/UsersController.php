@@ -110,6 +110,20 @@ class UsersController extends Controller
         return redirect()->route('admin.users.index')->with('success', "$user->name agora é admin!");
     }
 
+    public function demoteToClient(User $user)
+    {
+        $this->authorizeAdmin();
+
+        if (Auth::id() === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Você não pode rebaixar a si mesmo.');
+        }
+
+        $user->role = 'cliente';
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('success', "$user->name agora é cliente!");
+    }
+
     // Verifica se o usuário logado é admin
     private function authorizeAdmin()
     {

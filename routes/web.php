@@ -153,6 +153,8 @@ Route::prefix('admin')
             'categories' => CategoriesController::class,
         ]);
                 Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
+                Route::put('/users/{user}/demote', [UsersController::class, 'demoteToClient'])->name('users.demote');
+
     });
 
 // ===================== Rotas API Pública =====================
