@@ -22,7 +22,7 @@ class CategoriesController extends Controller
     public function index()
     {
         $categories = Categories::all(); // qualquer usuário logado vê
-        return view('categories.index', compact('categories'));
+        return view('admin.categories.index', compact('categories'));
     }
 
     /**
@@ -32,7 +32,7 @@ class CategoriesController extends Controller
     public function create()
     {
         $this->authorizeAdmin();
-        return view('categories.create');
+        return view('admin.categories.create');
     }
 
     /**
@@ -52,7 +52,7 @@ class CategoriesController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Categoria criada com sucesso!');
+        return redirect()->route('admin.categories.index')->with('success', 'Categoria criada com sucesso!');
     }
 
     /**
@@ -60,7 +60,7 @@ class CategoriesController extends Controller
      */
     public function show(Categories $category)
     {
-        return view('categories.show', compact('category'));
+        return view('admin.categories.show', compact('category'));
     }
 
     /**
@@ -69,7 +69,7 @@ class CategoriesController extends Controller
     public function edit(Categories $category)
     {
         $this->authorizeAdmin();
-        return view('categories.edit', compact('category'));
+        return view('admin.categories.edit', compact('category'));
     }
 
     /**
@@ -89,7 +89,7 @@ class CategoriesController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Categoria atualizada com sucesso!');
+        return redirect()->route('admin.categories.index')->with('success', 'Categoria atualizada com sucesso!');
     }
 
     /**
@@ -101,7 +101,7 @@ class CategoriesController extends Controller
 
         $category->delete();
 
-        return redirect()->route('categories.index')->with('success', 'Categoria deletada com sucesso!');
+        return redirect()->route('admin.categories.index')->with('success', 'Categoria deletada com sucesso!');
     }
 
     /**
