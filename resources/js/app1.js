@@ -10,9 +10,12 @@ const els = {
   backdrop: document.querySelector("#backdrop"),
   cartItems: document.querySelector("#cart-items"),
   subtotal: document.querySelector("#subtotal"),
+  total: document.querySelector("#total"),
+  discountArea: document.getElementById("discount-area"),
+  discountValue: document.getElementById("discount-value"),
   cartCount: document.querySelector("#cart-count"),
   closeDrawer: document.querySelector("#close-drawer"),
-  checkout: document.querySelector("#checkout"),
+  checkout: document.querySelector("#checkout")
 };
 
 // ===== Filters =====
@@ -25,6 +28,7 @@ let filters = {
 // ===== Produtos e carrinho =====
 let PRODUCTS = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
+//let appliedCoupon = null;
 
 // ===== Utils =====
 const BRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -53,22 +57,20 @@ function applyFilters(list) {
 }
 
 // ===== Render produtos =====
-// ===== Render produtos =====
 function renderProducts() {
   if (!els.products) return;
   const items = applyFilters(PRODUCTS).filter(p => p.status === 'ativo' && p.stock_quantity > 0 );
-
   els.products.innerHTML = items.map(p => {
     const hasDiscount = p.final_price && p.final_price < p.price;
     return `
-    <article class="card" data-id="${p.id}">
-      <img src="${p.images?.[0]?.image_path || 'assets/default.jpg'}" alt="${p.title}" />
-      <h4>${p.title}</h4>
-      <div class="price">
-        ${hasDiscount ? `<span style="text-decoration: line-through; color: #999;">${BRL(p.price)}</span> <span style="color: red; font-weight: bold;">${BRL(p.final_price)}</span>` : BRL(p.price)}
-      </div>
-      <button class="btn btn-dark add-cart">Adicionar ao carrinho</button>
-    </article>
+      <article class="card" data-id="${p.id}">
+        <img src="${p.images?.[0]?.image_path || 'assets/default.jpg'}" alt="${p.title}" />
+        <h4>${p.title}</h4>
+        <div class="price">
+          ${hasDiscount ? `<span style="text-decoration: line-through; color: #999;">${BRL(p.price)}</span> <span style="color: red; font-weight: bold;">${BRL(p.final_price)}</span>` : BRL(p.price)}
+        </div>
+        <button class="btn btn-dark add-cart">Adicionar ao carrinho</button>
+      </article>
     `;
   }).join("");
 
@@ -80,7 +82,6 @@ function renderProducts() {
   });
 }
 
-
 // ===== Filtros =====
 // Busca
 els.search?.addEventListener("input", e => {
@@ -90,14 +91,13 @@ els.search?.addEventListener("input", e => {
 
 // Categoria
 els.chipCategorias?.querySelectorAll(".chip").forEach(chip => {
-    chip.addEventListener("click", e => {
-        els.chipCategorias.querySelectorAll(".chip").forEach(c => c.classList.remove("is-active"));
-        e.target.classList.add("is-active");
-        filters.category = e.target.dataset.category.toLowerCase();
-        renderProducts();
-    });
+  chip.addEventListener("click", e => {
+    els.chipCategorias.querySelectorAll(".chip").forEach(c => c.classList.remove("is-active"));
+    e.target.classList.add("is-active");
+    filters.category = e.target.dataset.category.toLowerCase();
+    renderProducts();
+  });
 });
-
 
 // Preço
 els.preco?.addEventListener("input", e => {
@@ -116,7 +116,7 @@ function addToCart(id) {
       id: prod.id,
       title: prod.title,
       price: prod.price,
-      final_price: prod.final_price, // 👈 adiciona aqui
+      final_price: prod.final_price,
       img: prod.images?.[0]?.image_path || 'assets/default.jpg',
       qty: 1
     });
@@ -125,52 +125,9 @@ function addToCart(id) {
   renderCart();
   openDrawer();
 }
-// ===== Aplicar cupom =====
-// ===== Aplicar cupom =====
-document.getElementById('apply-coupon')?.addEventListener('click', async () => {
-    const code = document.getElementById('coupon-code').value.trim();
-    if (!code) return alert("Digite um código de cupom válido");
-
-    const subtotal = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
-
-    try {
-        const res = await fetch('/apply-coupon', {  // ✅ rota correta
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                code,
-                total: subtotal
-            })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            document.getElementById('discount-area').style.display = 'block';
-            document.getElementById('discount-value').textContent = `R$${data.discount}`;
-            document.getElementById('total').textContent = `R$${data.new_total}`;
-            const msgEl = document.getElementById('coupon-message');
-            msgEl.style.display = 'block';
-            msgEl.style.color = 'green';
-            msgEl.textContent = 'Cupom aplicado com sucesso!';
-        } else {
-            const msgEl = document.getElementById('coupon-message');
-            msgEl.style.display = 'block';
-            msgEl.style.color = 'red';
-            msgEl.textContent = data.error || 'Erro ao aplicar cupom';
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Erro ao aplicar cupom');
-    }
-});
-
-
 
 // ===== Render carrinho =====
+
 function renderCart() {
   if (!els.cartItems) return;
   els.cartItems.innerHTML = cart.length ? cart.map(i => {
@@ -196,7 +153,23 @@ function renderCart() {
   }).join("") : "<p>Seu carrinho está vazio.</p>";
 
   const subtotal = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
+  let total = subtotal;
+
+  if (appliedCoupon && appliedCoupon.amount) {
+    const discount = Number(appliedCoupon.amount) || 0;
+    total = Math.max(0, subtotal - discount);
+    if (els.discountArea) {
+        els.discountArea.style.display = 'block';
+        els.discountValue.textContent = BRL(discount);
+    }
+} else {
+    if (els.discountArea) els.discountArea.style.display = 'none';
+}
+
+
   if (els.subtotal) els.subtotal.textContent = BRL(subtotal);
+  if (els.total) els.total.textContent = BRL(total);
+
   updateCartCount();
 
   document.querySelectorAll(".cart-item .inc").forEach(b => b.onclick = qtyInc);
@@ -217,13 +190,6 @@ function qtyDec(e) {
   renderCart();
 }
 
-// ===== Drawer =====
-function openDrawer() { els.drawer?.classList.add("open"); els.backdrop?.classList.add("show"); }
-function closeDrawer() { els.drawer?.classList.remove("open"); els.backdrop?.classList.remove("show"); }
-els.cartBtn?.addEventListener("click", openDrawer);
-els.closeDrawer?.addEventListener("click", closeDrawer);
-els.backdrop?.addEventListener("click", closeDrawer);
-
 // ===== Cart count =====
 function updateCartCount() {
   if (els.cartCount) {
@@ -231,16 +197,166 @@ function updateCartCount() {
   }
 }
 
-// ===== Checkout mock =====
+// ===== Drawer =====
+function openDrawer() { els.drawer?.classList.add("open"); els.backdrop?.classList.add("show"); }
+function closeDrawer() { els.drawer?.classList.remove("open"); els.backdrop?.classList.remove("show"); }
+els.cartBtn?.addEventListener("click", openDrawer);
+els.closeDrawer?.addEventListener("click", closeDrawer);
+els.backdrop?.addEventListener("click", closeDrawer);
+let appliedCoupon = null; // guarda o cupom aplicado
 
+// ===== Função para formatar em BRL =====
+//const BRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+// ===== Render carrinho =====
+/*
+function renderCart() {
+    const cartItemsEl = document.getElementById('cart-items');
+    if (!cartItemsEl) return;
+
+    cartItemsEl.innerHTML = cart.length
+        ? cart.map(i => {
+            const hasDiscount = i.final_price && i.final_price < i.price;
+            return `
+                <div class="cart-item" data-id="${i.id}">
+                    <img src="${i.img}" alt="${i.title}" />
+                    <div class="meta">
+                        <strong>${i.title}</strong><br/>
+                        <small>
+                            ${hasDiscount
+                                ? `<span style="text-decoration: line-through; color: #999;">${BRL(i.price)}</span> <span style="color: red; font-weight: bold;">${BRL(i.final_price)}</span>`
+                                : BRL(i.price)}
+                        </small>
+                    </div>
+                    <div class="qty">
+                        <button class="dec">-</button>
+                        <span>${i.qty}</span>
+                        <button class="inc">+</button>
+                    </div>
+                </div>
+            `;
+        }).join("")
+        : "<p>Seu carrinho está vazio.</p>";
+
+    // Calcula subtotal
+    let subtotal = cart.reduce((sum, i) => sum + (i.final_price || i.price) * i.qty, 0);
+
+    // Aplica desconto do cupom se houver
+    let discount = appliedCoupon?.amount || 0;
+    const total = subtotal - discount;
+
+    // Atualiza HTML
+    document.getElementById('subtotal').textContent = BRL(subtotal);
+    if (discount > 0) {
+        document.getElementById('discount-area').style.display = 'block';
+        document.getElementById('discount-value').textContent = BRL(discount);
+    } else {
+        document.getElementById('discount-area').style.display = 'none';
+    }
+    document.getElementById('total').textContent = BRL(total);
+
+    // Botões de quantidade
+    document.querySelectorAll(".cart-item .inc").forEach(b => b.onclick = qtyInc);
+    document.querySelectorAll(".cart-item .dec").forEach(b => b.onclick = qtyDec);
+
+    updateCartCount();
+}
+*/
+// ===== Aplicar cupom =====
+document.getElementById('apply-coupon')?.addEventListener('click', async () => {
+    const code = document.getElementById('coupon-code').value.trim();
+    if (!code) return alert("Digite um código de cupom válido");
+
+    const subtotal = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
+
+    try {
+        const res = await fetch('/apply-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ code, total: subtotal })
+        });
+
+        const data = await res.json();
+
+        const msgEl = document.getElementById('coupon-message');
+        msgEl.style.display = 'block';
+
+        if (res.ok) {
+            // Aqui pegamos o valor correto do desconto retornado
+            appliedCoupon = { amount: parseFloat(data.discount) || 0 };
+            renderCart(); // atualiza subtotal, total e desconto
+
+            msgEl.style.color = 'green';
+            msgEl.textContent = 'Cupom aplicado com sucesso!';
+        } else {
+            appliedCoupon = null;
+            renderCart(); // remove desconto
+            msgEl.style.color = 'red';
+            msgEl.textContent = data.error || 'Erro ao aplicar cupom';
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao aplicar cupom");
+    }
+});
+
+
+
+
+// ===== Checkout - redireciona para /carts =====
 els.checkout?.addEventListener("click", () => {
- // alert("✅ Pedido finalizado!");
-  //cart = [];
-  //saveCart();
-  //renderCart();
-   window.location.href = '/cart';
-  closeDrawer();
-  
+    // Fecha o drawer do carrinho
+    closeDrawer();
+
+    // Redireciona para a página de checkout/carrinho
+    window.location.href = '/cart';
+});
+
+// ===== CEP e endereço =====
+document.getElementById('btn-cep')?.addEventListener('click', async () => {
+  const cep = document.getElementById('cep').value.replace(/\D/g,'');
+  if(!cep) return alert("Digite um CEP válido");
+
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await res.json();
+    if(data.erro) return alert("CEP não encontrado");
+
+    document.getElementById('road').value = data.logradouro;
+    document.getElementById('neighborhood').value = data.bairro;
+    document.getElementById('city').value = data.localidade;
+    document.getElementById('state').value = data.uf;
+  } catch(err) {
+    console.error(err);
+    alert("Erro ao buscar CEP");
+  }
+});
+
+document.getElementById('address-form')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  try {
+    const res = await fetch('/addresses', {
+      method: 'POST',
+      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+      body: formData
+    });
+    if(res.ok) {
+      alert('Endereço salvo!');
+      window.location.reload();
+    } else alert('Erro ao salvar endereço');
+  } catch(err) {
+    console.error(err);
+    alert('Erro ao salvar endereço');
+  }
+});
+
+document.getElementById('btn-change-address')?.addEventListener('click', () => {
+  const form = document.getElementById('address-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
 });
 
 // ===== Footer year =====
@@ -258,80 +374,3 @@ logoutForm?.addEventListener('submit', () => {
 // ===== Init =====
 fetchProducts();
 renderCart();
-
-//logica endreço no checkout bucar enreço api correios
-document.getElementById('btn-cep')?.addEventListener('click', async () => {
-    const cep = document.getElementById('cep').value.replace(/\D/g,'');
-    if(!cep) return alert("Digite um CEP válido");
-
-    try {
-        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await res.json();
-
-        if(data.erro) return alert("CEP não encontrado");
-
-        document.getElementById('road').value = data.logradouro;
-        document.getElementById('neighborhood').value = data.bairro;
-        document.getElementById('city').value = data.localidade;
-        document.getElementById('state').value = data.uf;
-    } catch(err) {
-        console.error(err);
-        alert("Erro ao buscar CEP");
-    }
-});
-
-//enviar formulário endereço
-document.getElementById('address-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
-    try {
-        const res = await fetch('/addresses', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: formData
-        });
-        if(res.ok) {
-            alert('Endereço salvo!');
-            window.location.reload(); // Recarrega para não mostrar mais o formulário
-        } else {
-            alert('Erro ao salvar endereço');
-        }
-    } catch(err) {
-        console.error(err);
-        alert('Erro ao salvar endereço');
-    }
-});
-//outro endereço
-document.getElementById('btn-change-address')?.addEventListener('click', () => {
-    const form = document.getElementById('address-form');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-});
-
-//escolher qual endereço usar no checkout
-document.getElementById("checkout")?.addEventListener("click", () => {
-    const addressId = document.getElementById("address_id")?.value;
-
-    fetch("/cart/checkout", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-            items: cart,
-            address_id: addressId
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert("✅ " + data.message);
-        cart = [];
-        saveCart();
-        renderCart();
-    })
-    .catch(err => console.error("Erro no checkout:", err));
-});
-
