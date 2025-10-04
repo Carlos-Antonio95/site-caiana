@@ -23,7 +23,7 @@ class CouponsController extends Controller
     {
         $this->authorizeAdmin();
         $coupons = Coupons::all();
-        return view('coupons.index', compact('coupons'));
+        return view('admin.coupons.index', compact('coupons'));
     }
 
     /**
@@ -32,7 +32,7 @@ class CouponsController extends Controller
     public function create()
     {
         $this->authorizeAdmin();
-        return view('coupons.create');
+        return view('admin.coupons.create');
     }
 
     /**
@@ -63,7 +63,7 @@ class CouponsController extends Controller
     public function show(Coupons $coupon)
     {
         $this->authorizeAdmin();
-        return view('coupons.show', compact('coupon'));
+        return view('admin.coupons.show', compact('coupon'));
     }
 
     /**
@@ -94,7 +94,7 @@ class CouponsController extends Controller
 
         $coupon->update($request->all());
 
-        return redirect()->route('coupons.index')->with('success', 'Cupom atualizado com sucesso!');
+        return redirect()->route('admin.coupons.index')->with('success', 'Cupom atualizado com sucesso!');
     }
 
     /**
@@ -105,7 +105,7 @@ class CouponsController extends Controller
         $this->authorizeAdmin();
         $coupon->delete();
 
-        return redirect()->route('coupons.index')->with('success', 'Cupom deletado com sucesso!');
+        return redirect()->route('admin.coupons.index')->with('success', 'Cupom deletado com sucesso!');
     }
 
     /**
