@@ -125,6 +125,49 @@ function addToCart(id) {
   renderCart();
   openDrawer();
 }
+// ===== Aplicar cupom =====
+// ===== Aplicar cupom =====
+document.getElementById('apply-coupon')?.addEventListener('click', async () => {
+    const code = document.getElementById('coupon-code').value.trim();
+    if (!code) return alert("Digite um código de cupom válido");
+
+    const subtotal = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
+
+    try {
+        const res = await fetch('/apply-coupon', {  // ✅ rota correta
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                code,
+                total: subtotal
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            document.getElementById('discount-area').style.display = 'block';
+            document.getElementById('discount-value').textContent = `R$${data.discount}`;
+            document.getElementById('total').textContent = `R$${data.new_total}`;
+            const msgEl = document.getElementById('coupon-message');
+            msgEl.style.display = 'block';
+            msgEl.style.color = 'green';
+            msgEl.textContent = 'Cupom aplicado com sucesso!';
+        } else {
+            const msgEl = document.getElementById('coupon-message');
+            msgEl.style.display = 'block';
+            msgEl.style.color = 'red';
+            msgEl.textContent = data.error || 'Erro ao aplicar cupom';
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erro ao aplicar cupom');
+    }
+});
+
 
 
 // ===== Render carrinho =====

@@ -8,8 +8,22 @@
         <h2>Seu Carrinho</h2>
         <div id="cart-items"></div>
 
-        <div class="subtotal">
-            Total: <span id="subtotal">R$0,00</span>
+        {{-- Totais e Cupom --}}
+        <div class="totais">
+            <div class="subtotal">
+                <p>Subtotal: <span id="subtotal">R$0,00</span></p>
+                <p id="discount-area" style="display:none; color:green;">
+                    Desconto: <span id="discount-value">R$0,00</span>
+                </p>
+                <p><strong>Total: <span id="total">R$0,00</span></strong></p>
+            </div>
+
+            <div class="coupon mt-3">
+                <h4>Aplicar Cupom</h4>
+                <input type="text" id="coupon-code" placeholder="Digite seu cupom" />
+                <button type="button" id="apply-coupon" class="btn btn-secondary">Aplicar</button>
+                <p id="coupon-message" style="color: green; display: none;"></p>
+            </div>
         </div>
 
         {{-- Endereços --}}
@@ -49,7 +63,7 @@
                     <label>País</label>
                     <input type="text" name="country" id="country" required value="Brasil">
                 </div>
-                <button type="submit">Salvar Endereço</button>
+                <button type="submit" class="btn btn-success">Salvar Endereço</button>
             </form>
         @else
             <h3>Selecione um endereço</h3>
@@ -63,7 +77,7 @@
                         </option>
                     @endforeach
                 </select>
-                <button type="button" id="btn-change-address" class="btn btn-secondary">
+                <button type="button" id="btn-change-address" class="btn btn-secondary mt-2">
                     Usar outro endereço
                 </button>
             </form>
@@ -103,11 +117,13 @@
                     <label>País</label>
                     <input type="text" name="country" id="country" required value="Brasil">
                 </div>
-                <button type="submit">Salvar Novo Endereço</button>
+                <button type="submit" class="btn btn-success">Salvar Novo Endereço</button>
             </form>
         @endif
 
-        <button id="checkout" class="btn btn-primary">Finalizar Pedido</button>
+        <div class="mt-4">
+            <button id="checkout" class="btn btn-primary">Finalizar Pedido</button>
+        </div>
     </div>
 </div>
 

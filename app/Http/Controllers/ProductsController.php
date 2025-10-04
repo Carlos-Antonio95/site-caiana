@@ -27,18 +27,22 @@ class ProductsController extends Controller
 
     // Adiciona final_price
     $products = $products->map(function($p) {
-        return [
-            'id' => $p->id,
-            'title' => $p->title,
-            'description' => $p->description,
-            'price' => $p->price,
-            'final_price' => $p->final_price, // aqui
-            'stock_quantity' => $p->stock_quantity,
-            'status' => $p->status,
-            'category' => $p->category,
-            'images' => $p->images
-        ];
-    });
+    return [
+        'id' => $p->id,
+        'title' => $p->title,
+        'description' => $p->description,
+        'price' => $p->price,
+        'final_price' => $p->final_price,
+        'stock_quantity' => $p->stock_quantity,
+        'status' => $p->status,
+        'category' => [
+            'category_name' => $p->category?->title ?? '' // <-- garantir que o JS vai achar
+        ],
+        'images' => $p->images->map(fn($img) => [
+            'image_path' => $img->image_path
+        ])
+    ];
+});
 
     return response()->json($products);
 }

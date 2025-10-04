@@ -35,6 +35,24 @@ class CouponsController extends Controller
         return view('admin.coupons.create');
     }
 
+     public function validateCoupon(Request $request)
+    {
+        $code = $request->input('code');
+        $coupon = Coupons::where('code', $code)
+                        ->where('expires_at', '>', now())
+                        ->first();
+
+        if (!$coupon) {
+            return response()->json(['valid' => false, 'message' => 'Cupom inválido ou expirado.'], 400);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'code' => $coupon->code,
+            'type' => $coupon->type, // 'percent' ou 'fixed'
+            'value' => $coupon->discount_value,
+        ]);
+    }
     /**
      * Salva um novo cupom no banco
      */
@@ -107,6 +125,57 @@ class CouponsController extends Controller
 
         return redirect()->route('admin.coupons.index')->with('success', 'Cupom deletado com sucesso!');
     }
+    /**
+ * Aplica um cupom de desconto no carrinho ou pedido
+ */
+public function applyCoupon(Request $request)
+{
+    $request->validate([
+        'code' => 'required|string',
+        'total' => 'required|numeric|min:0', // total do carrinho enviado
+    ]);
+
+    $coupon = Coupons::where('code', $request->code)
+        ->where('active', true)
+        ->first();
+
+    if (!$coupon) {
+        return response()->json(['error' => 'Cupom inválido ou inexistente.'], 404);
+    }
+
+    // Verifica expiração
+    if (now()->gt($coupon->expiration_date)) {
+        return response()->json(['error' => 'Cupom expirado.'], 400);
+    }
+
+    // Verifica usos restantes
+    if ($coupon->max_use <= 0) {
+        return response()->json(['error' => 'Este cupom atingiu o limite de usos.'], 400);
+    }
+
+    // Verifica valor mínimo
+    if ($request->total < $coupon->min_discount) {
+        return response()->json(['error' => 'O valor mínimo para usar este cupom é R$ ' . number_format($coupon->min_discount, 2, ',', '.')], 400);
+    }
+
+    // Calcula o desconto
+    $discountValue = $coupon->discount_type === 'percentual'
+        ? ($request->total * ($coupon->discount_value / 100))
+        : $coupon->discount_value;
+
+    // Garante que o desconto não seja maior que o total
+    $discountValue = min($discountValue, $request->total);
+
+    // Decrementa o uso do cupom
+    $coupon->decrement('max_use');
+
+    return response()->json([
+        'success' => true,
+        'discount' => number_format($discountValue, 2, ',', '.'),
+        'new_total' => number_format($request->total - $discountValue, 2, ',', '.'),
+    ]);
+}
+
 
     /**
      * Função para verificar se o usuário logado é admin
