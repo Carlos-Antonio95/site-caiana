@@ -7,7 +7,8 @@
         ProductsController, ProductsVariantsController, PromotionsController,
         ProductsImagesController, PromotionProductController, ProductReviewsController,
         CouponsController, CartItemController, CartsController, OrdersController,
-        OrderItemsController, PaymentsController, AdminActivityController
+        OrderItemsController, PaymentsController, AdminActivityController,
+        ContactController
     };
 
     use App\Http\Controllers\Auth\{
@@ -151,6 +152,7 @@
                 'order_items' => OrderItemsController::class,
                 'products_images' => ProductsImagesController::class,
                 'categories' => CategoriesController::class,
+                'contacts' => ContactController::class,
             ]);
                     Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
                     Route::put('/users/{user}/demote', [UsersController::class, 'demoteToClient'])->name('users.demote');
@@ -171,4 +173,5 @@
     Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest'])
         ->name('admin.orders.changeStatusTest'); // Adicione este nome
 
+        Route::post('/contato', [ContactController::class, 'store'])->name('contato.store');
 
