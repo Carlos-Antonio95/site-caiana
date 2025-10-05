@@ -91,7 +91,7 @@ class UsersController extends Controller
     {
         $this->authorizeAdmin();
 
-        if (Auth::id() === $user->id) {
+        if (Auth::id() === $user->id || $user->id === 1 || $user->id === 2) {
             return redirect()->route('admin.users.index')->with('error', 'Você não pode deletar a si mesmo.');
         }
 
