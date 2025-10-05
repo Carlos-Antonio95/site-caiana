@@ -31,7 +31,8 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 //let appliedCoupon = null;
 
 // ===== Utils =====
-const BRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const BRL = v => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+
 const saveCart = () => localStorage.setItem('cart', JSON.stringify(cart));
 
 // ===== Fetch produtos =====
@@ -286,7 +287,10 @@ document.getElementById('apply-coupon')?.addEventListener('click', async () => {
 
         if (res.ok) {
             // Aqui pegamos o valor correto do desconto retornado
-            appliedCoupon = { amount: parseFloat(data.discount) || 0 };
+            const discountValue = Number(parseFloat(data.discount).toFixed(2));
+appliedCoupon = { amount: discountValue };
+
+
             renderCart(); // atualiza subtotal, total e desconto
 
             msgEl.style.color = 'green';
@@ -313,6 +317,7 @@ els.checkout?.addEventListener("click", () => {
 
     // Redireciona para a página de checkout/carrinho
     window.location.href = '/cart';
+    
 });
 
 // ===== CEP e endereço =====

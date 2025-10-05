@@ -1,23 +1,22 @@
 <?php
 
 namespace App\Http\Controllers;
-/** 
- * @method \Illuminate\Routing\Middleware middleware(string $name, array $options = [])
- */
+
 use App\Models\Coupons;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-class CouponsController extends Controller
+use Carbon\Carbon;
 
-   {
+class CouponsController extends Controller
+{
     public function __construct()
     {
-        // Aplica middleware auth para proteger todas as rotas
+        // Protege todas as rotas com autenticação
         $this->middleware('auth');
     }
 
     /**
-     * Exibe a lista de cupons
+     * Exibe a lista de cupons (somente admin)
      */
     public function index()
     {
@@ -27,7 +26,7 @@ class CouponsController extends Controller
     }
 
     /**
-     * Exibe o formulário de criação de cupom
+     * Exibe formulário de criação de cupom
      */
     public function create()
     {
@@ -35,12 +34,16 @@ class CouponsController extends Controller
         return view('admin.coupons.create');
     }
 
-     public function validateCoupon(Request $request)
+    /**
+     * Valida um cupom (AJAX)
+     */
+    public function validateCoupon(Request $request)
     {
         $code = $request->input('code');
+
         $coupon = Coupons::where('code', $code)
-                        ->where('expires_at', '>', now())
-                        ->first();
+            ->where('expires_at', '>', now())
+            ->first();
 
         if (!$coupon) {
             return response()->json(['valid' => false, 'message' => 'Cupom inválido ou expirado.'], 400);
@@ -48,26 +51,27 @@ class CouponsController extends Controller
 
         return response()->json([
             'valid' => true,
-            'code' => $coupon->code,
-            'type' => $coupon->type, // 'percent' ou 'fixed'
+            'code'  => $coupon->code,
+            'type'  => $coupon->type,
             'value' => $coupon->discount_value,
         ]);
     }
+
     /**
-     * Salva um novo cupom no banco
+     * Cria um novo cupom
      */
     public function store(Request $request)
     {
         $this->authorizeAdmin();
 
         $request->validate([
-            'code' => 'required|string|max:50|unique:coupons,code',
-            'discount_type' => 'required|in:valor,percentual',
-            'discount_value' => 'required|numeric|min:0',
-            'min_discount' => 'required|numeric|min:0',
+            'code'            => 'required|string|max:50|unique:coupons,code',
+            'discount_type'   => 'required|in:valor,percentual',
+            'discount_value'  => 'required|numeric|min:0',
+            'min_discount'    => 'required|numeric|min:0',
             'expiration_date' => 'required|date',
-            'max_use' => 'required|integer|min:1',
-            'active' => 'required|boolean',
+            'max_use'         => 'required|integer|min:1',
+            'active'          => 'required|boolean',
         ]);
 
         Coupons::create($request->all());
@@ -76,7 +80,7 @@ class CouponsController extends Controller
     }
 
     /**
-     * Exibe os detalhes de um cupom
+     * Exibe detalhes de um cupom
      */
     public function show(Coupons $coupon)
     {
@@ -85,7 +89,7 @@ class CouponsController extends Controller
     }
 
     /**
-     * Exibe o formulário de edição de um cupom
+     * Exibe formulário de edição de cupom
      */
     public function edit(Coupons $coupon)
     {
@@ -94,20 +98,20 @@ class CouponsController extends Controller
     }
 
     /**
-     * Atualiza os dados de um cupom
+     * Atualiza um cupom
      */
     public function update(Request $request, Coupons $coupon)
     {
         $this->authorizeAdmin();
 
         $request->validate([
-            'code' => 'required|string|max:50|unique:coupons,code,' . $coupon->id,
-            'discount_type' => 'required|in:valor,percentual',
-            'discount_value' => 'required|numeric|min:0',
-            'min_discount' => 'required|numeric|min:0',
+            'code'            => 'required|string|max:50|unique:coupons,code,' . $coupon->id,
+            'discount_type'   => 'required|in:valor,percentual',
+            'discount_value'  => 'required|numeric|min:0',
+            'min_discount'    => 'required|numeric|min:0',
             'expiration_date' => 'required|date',
-            'max_use' => 'required|integer|min:1',
-            'active' => 'required|boolean',
+            'max_use'         => 'required|integer|min:1',
+            'active'          => 'required|boolean',
         ]);
 
         $coupon->update($request->all());
@@ -125,60 +129,86 @@ class CouponsController extends Controller
 
         return redirect()->route('admin.coupons.index')->with('success', 'Cupom deletado com sucesso!');
     }
-    /**
- * Aplica um cupom de desconto no carrinho ou pedido
- */
-public function applyCoupon(Request $request)
-{
-    $request->validate([
-        'code' => 'required|string',
-        'total' => 'required|numeric|min:0', // total do carrinho enviado
-    ]);
-
-    $coupon = Coupons::where('code', $request->code)
-        ->where('active', true)
-        ->first();
-
-    if (!$coupon) {
-        return response()->json(['error' => 'Cupom inválido ou inexistente.'], 404);
-    }
-
-    // Verifica expiração
-    if (now()->gt($coupon->expiration_date)) {
-        return response()->json(['error' => 'Cupom expirado.'], 400);
-    }
-
-    // Verifica usos restantes
-    if ($coupon->max_use <= 0) {
-        return response()->json(['error' => 'Este cupom atingiu o limite de usos.'], 400);
-    }
-
-    // Verifica valor mínimo
-    if ($request->total < $coupon->min_discount) {
-        return response()->json(['error' => 'O valor mínimo para usar este cupom é R$ ' . number_format($coupon->min_discount, 2, ',', '.')], 400);
-    }
-
-    // Calcula o desconto
-    $discountValue = $coupon->discount_type === 'percentual'
-        ? ($request->total * ($coupon->discount_value / 100))
-        : $coupon->discount_value;
-
-    // Garante que o desconto não seja maior que o total
-    $discountValue = min($discountValue, $request->total);
-
-    // Decrementa o uso do cupom
-    $coupon->decrement('max_use');
-
-    return response()->json([
-        'success' => true,
-        'discount' => number_format($discountValue, 2, ',', '.'),
-        'new_total' => number_format($request->total - $discountValue, 2, ',', '.'),
-    ]);
-}
-
 
     /**
-     * Função para verificar se o usuário logado é admin
+     * Aplica cupom de desconto no carrinho
+     */
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'code'  => 'required|string',
+            'total' => 'required|numeric|min:0',
+        ]);
+
+        $coupon = Coupons::where('code', $request->code)
+            ->where('active', true)
+            ->first();
+
+        if (!$coupon) {
+            return response()->json(['error' => 'Cupom inválido ou inexistente.'], 404);
+        }
+
+        if (now()->gt($coupon->expiration_date)) {
+            return response()->json(['error' => 'Cupom expirado.'], 400);
+        }
+
+        if ($coupon->max_use <= 0) {
+            return response()->json(['error' => 'Este cupom atingiu o limite de usos.'], 400);
+        }
+
+        if ($request->total < $coupon->min_discount) {
+            return response()->json([
+                'error' => 'O valor mínimo para usar este cupom é R$ ' .
+                    number_format($coupon->min_discount, 2, ',', '.')
+            ], 400);
+        }
+
+        $discountValue = $coupon->discount_type === 'percentual'
+            ? ($request->total * ($coupon->discount_value / 100))
+            : $coupon->discount_value;
+
+        $discountValue = min($discountValue, $request->total);
+
+        // Decrementa o uso e salva na sessão
+        $coupon->decrement('max_use');
+        session(['discount' => $discountValue]);
+
+        // Desativa se necessário
+        $this->deactivateCoupon(new Request(['code' => $coupon->code]));
+
+        return response()->json([
+    'success'   => true,
+    'discount'  => $discountValue, // envia número puro, sem formatar
+    'new_total' => $request->total - $discountValue,
+]);
+
+    }
+
+    /**
+     * Desativa cupom manualmente
+     */
+    public function deactivateCoupon(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        $coupon = Coupons::where('code', $request->code)->first();
+
+        if (!$coupon) {
+            return response()->json(['error' => 'Cupom inválido ou inexistente.'], 404);
+        }
+
+        if ($coupon->max_use <= 0 || now()->gt(Carbon::parse($coupon->expiration_date))) {
+            $coupon->active = false;
+            $coupon->save();
+        }
+
+        return response()->json(['success' => 'Cupom desativado com sucesso.']);
+    }
+
+    /**
+     * Verifica se o usuário é admin
      */
     private function authorizeAdmin()
     {

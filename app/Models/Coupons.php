@@ -17,6 +17,7 @@ class Coupons extends Model
         'expiration_date',
         'max_use',
         'active',
+        'discount',
     ];
 
     // Você pode criar funções auxiliares, por exemplo:

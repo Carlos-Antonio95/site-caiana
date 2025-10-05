@@ -8,9 +8,9 @@ use App\Models\Client;
 use App\Models\Addresses;
 use App\Models\Orders;
 use App\Models\OrderItems;
+use App\Models\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Products;
 
 class CartsController extends Controller
 {
@@ -20,7 +20,7 @@ class CartsController extends Controller
     }
 
     /**
-     * Listar todos os carrinhos (admin).
+     * Listar todos os carrinhos (admin)
      */
     public function index()
     {
@@ -30,7 +30,7 @@ class CartsController extends Controller
     }
 
     /**
-     * Criar um carrinho (apenas admin ou sistema).
+     * Criar um novo carrinho (admin)
      */
     public function store(Request $request)
     {
@@ -45,12 +45,12 @@ class CartsController extends Controller
 
         return response()->json([
             'message' => 'Carrinho criado com sucesso!',
-            'cart' => $cart
+            'cart'    => $cart,
         ]);
     }
 
     /**
-     * Atualizar carrinho.
+     * Atualizar carrinho
      */
     public function update(Request $request, Carts $cart)
     {
@@ -65,31 +65,32 @@ class CartsController extends Controller
 
         return response()->json([
             'message' => 'Carrinho atualizado com sucesso!',
-            'cart' => $cart
+            'cart'    => $cart,
         ]);
     }
 
     /**
-     * Remover carrinho.
+     * Remover carrinho
      */
     public function destroy(Carts $cart)
     {
         $this->authorizeAdmin();
         $cart->delete();
 
-        return response()->json([
-            'message' => 'Carrinho removido com sucesso!'
-        ]);
+        return response()->json(['message' => 'Carrinho removido com sucesso!']);
     }
 
     /**
-     * Checkout do carrinho.
+     * Finalizar checkout (gera pedido)
      */
     public function checkout(Request $request)
     {
         $user = Auth::user();
         $items = $request->input('items', []);
         $addressId = $request->input('address_id');
+
+        // Desconto salvo da sessão (cupom aplicado)
+        $discount = session('discount', 0);
 
         if (empty($items)) {
             return response()->json(['message' => 'Carrinho vazio'], 400);
@@ -100,107 +101,102 @@ class CartsController extends Controller
         }
 
         $cart = Carts::create([
-            'id_clients' => $user->id,
-            'session_id' => session()->getId(),
-            'id_addresses' => $addressId
+            'id_clients'   => $user->id,
+            'session_id'   => session()->getId(),
+            'id_addresses' => $addressId,
         ]);
-$total = 0;
-foreach ($items as $item) {
-    // Buscar o produto e calcular o preço final
-    $product = Products::find($item['id']);
-    if (!$product) continue;
 
-    $price = $product->final_price; // usa o accessor que calcula promoção
+        $total = 0;
 
-    CartItems::create([
-        'id_carts' => $cart->id,
-        'id_products' => $product->id,
-        'quantity' => $item['qty'],
-        'price' => $price, // aqui vai o preço final
-        'title' => $product->title,
-        'session_id' => $cart->session_id,
-    ]);
+        foreach ($items as $item) {
+            $product = Products::find($item['id']);
+            if (!$product) continue;
 
-    $total += $price * $item['qty'];
-}
+            $price = $product->final_price;
 
-$order = Orders::create([
-    'id_clients' => $user->id,
-    'id_addresses' => $addressId,
-    'status' => 'pendente',
-    'total_value' => $total,
-]);
+            CartItems::create([
+                'id_carts'    => $cart->id,
+                'id_products' => $product->id,
+                'quantity'    => $item['qty'],
+                'price'       => $price,
+                'title'       => $product->title,
+                'session_id'  => $cart->session_id,
+            ]);
 
-foreach ($items as $item) {
-    $product = Products::find($item['id']);
-    if (!$product) continue;
+            $total += $price * $item['qty'];
+        }
 
-    $quantity = $item['quantity'] ?? $item['qty'] ?? 1;
+        // Aplica o desconto armazenado
+        $finalTotal = max(0, $total - $discount);
 
-    OrderItems::create([
-        'id_order' => $order->id,
-        'id_product' => $product->id,
-        'id_variants' => $item['variant_id'] ?? null,
-        'title' => $product->title,
-        'price' => $product->final_price, // preço com desconto
-        'quantity' => $quantity,
-    ]);
-}
+        $order = Orders::create([
+            'id_clients'   => $user->id,
+            'id_addresses' => $addressId,
+            'status'       => 'pendente',
+            'total_value'  => $finalTotal,
+            'discount'     => $discount,
+        ]);
+
+        // Limpa a sessão do desconto após criar o pedido
+        session()->forget('discount');
+
+        foreach ($items as $item) {
+            $product = Products::find($item['id']);
+            if (!$product) continue;
+
+            OrderItems::create([
+                'id_order'  => $order->id,
+                'id_product'=> $product->id,
+                'title'     => $product->title,
+                'price'     => $product->final_price,
+                'quantity'  => $item['qty'],
+            ]);
+        }
+
         return response()->json([
-            'message' => 'Pedido finalizado com sucesso!',
-            'cart_id' => $cart->id,
-            'order_id' => $order->id,
-            'status' => $order->status,
+            'message'   => 'Pedido finalizado com sucesso!',
+            'order_id'  => $order->id,
+            'status'    => $order->status,
         ]);
     }
 
     /**
- * Editar carrinho (apenas admin)
-*/
+     * Editar carrinho (admin)
+     */
+    public function edit(Carts $cart)
+    {
+        $this->authorizeAdmin();
 
-public function edit(Carts $cart)
-{
-    $this->authorizeAdmin();
+        $cart->load(['items']);
+        $clients = Client::all();
 
-    $cart->load(['items']); // já carrega os itens do carrinho
-
-    // Carrega todos os clientes para popular o select
-    $clients = Client::all();
-
-    return view('admin.carts.edit', compact('cart', 'clients'));
-}
-
+        return view('admin.carts.edit', compact('cart', 'clients'));
+    }
 
     /**
-     * Mostrar carrinho do usuário.
+     * Mostrar carrinho do usuário autenticado
      */
     public function showCart()
-{
-    $user = Auth::user();
-    $addresses = Addresses::where('id_clients', $user->id)->get();
+    {
+        $user = Auth::user();
+        $addresses = Addresses::where('id_clients', $user->id)->get();
+        $cart = Carts::with('items.product')->where('id_clients', $user->id)->first();
 
-    // opcional: carregar os itens do carrinho do usuário
-    $cart = Carts::with('items.product')->where('id_clients', $user->id)->first();
-
-    return view('cart', compact('addresses', 'cart'));
-}
+        return view('cart', compact('addresses', 'cart'));
+    }
 
     /**
- * Mostrar detalhes de um carrinho específico (admin)
- */
-public function show(Carts $cart)
-{
-    $this->authorizeAdmin();
-
-    // Carrega os itens do carrinho e cliente
-    $cart->load(['client', 'items.product']); // assumindo relação 'product' em CartItems
-
-    return view('admin.carts.show', compact('cart'));
-}
-
+     * Mostrar detalhes de um carrinho (admin)
+     */
+    public function show(Carts $cart)
+    {
+        $this->authorizeAdmin();
+        $cart->load(['client', 'items.product']);
+        return view('admin.carts.show', compact('cart'));
+    }
 
     /**
-     * Apenas admins podem manipular diretamente os carrinhos.
+     * Verifica se usuário é admin
      */
     private function authorizeAdmin()
     {
