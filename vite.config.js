@@ -1,0 +1,28 @@
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: [
+                'resources/css/styles.css',
+                'resources/js/app1.js',
+                'resources/css/admin.css',
+                'resources/js/app.js',
+            ],
+            refresh: true,
+        }),
+    ],
+    build: {
+        outDir: 'public/build',
+        manifest: true,
+        rollupOptions: {
+            input: [
+                'resources/css/styles.css',
+                'resources/js/app1.js',
+                'resources/css/admin.css',
+                'resources/js/app.js',
+            ],
+        },
+    },
+});

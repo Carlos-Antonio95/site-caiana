@@ -1,0 +1,9 @@
+<?php
+
+return [
+    'password' => 'A senha deve ter no mínimo oito caracteres e corresponder à confirmação.',
+    'reset' => 'Sua senha foi redefinida com sucesso.',
+    'sent' => 'Enviamos o link de redefinição de senha para o seu email!',
+    'token' => 'Este token de redefinição de senha é inválido.',
+    'user' => 'Não conseguimos encontrar um usuário com esse endereço de email.',
+];
