@@ -20,6 +20,33 @@ class Products extends Model
         'status',
     ];
 
+    // Validação dos itens do carrinho enviados pelo front ([{id, qty}, ...])
+    public const CART_RULES = [
+        'items'        => 'required|array|min:1|max:50',
+        'items.*.id'   => 'required|integer|exists:products,id',
+        'items.*.qty'  => 'required|integer|min:1|max:99',
+    ];
+
+    /**
+     * Subtotal do carrinho com os preços do banco (produtos ativos apenas).
+     */
+    public static function subtotalFor(array $items): float
+    {
+        $products = static::whereIn('id', array_column($items, 'id'))
+            ->where('status', 'ativo')
+            ->get()
+            ->keyBy('id');
+
+        $subtotal = 0;
+        foreach ($items as $item) {
+            if ($product = $products->get($item['id'])) {
+                $subtotal += $product->final_price * $item['qty'];
+            }
+        }
+
+        return round($subtotal, 2);
+    }
+
     // Preço final do produto (considerando promoções)
    public function getFinalPriceAttribute()
 {

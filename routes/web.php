@@ -124,7 +124,8 @@ Route::post('/register', function (\Illuminate\Http\Request $request) {
         Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
         Route::post('/addresses', [AddressesController::class, 'store'])->name('addresses.store');
 
-        // Checkout do carrinho
+        // Cupom e checkout do carrinho
+        Route::post('/apply-coupon', [CouponsController::class, 'applyCoupon'])->name('coupons.apply');
         Route::post('/cart/checkout', [CartsController::class, 'checkout']);
     });
 
@@ -170,8 +171,5 @@ Route::post('/register', function (\Illuminate\Http\Request $request) {
     // ===================== Rotas API Pública =====================
     Route::get('/api/products', [ProductsController::class, 'getAll'])->name('api.products');
     Route::get('/products', [ProductsController::class, 'apiIndex']);
-    Route::post('/apply-coupon', [CouponsController::class, 'applyCoupon'])->name('coupons.apply');
-
-    Route::post('/coupons/validate', [CouponsController::class, 'validateCoupon']);
 
     Route::post('/contato', [ContactController::class, 'store'])->name('contato.store');

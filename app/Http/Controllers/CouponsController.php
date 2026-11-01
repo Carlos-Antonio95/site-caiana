@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Coupons;
+use App\Models\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class CouponsController extends Controller
 {
@@ -32,29 +32,6 @@ class CouponsController extends Controller
     {
         $this->authorizeAdmin();
         return view('admin.coupons.create');
-    }
-
-    /**
-     * Valida um cupom (AJAX)
-     */
-    public function validateCoupon(Request $request)
-    {
-        $code = $request->input('code');
-
-        $coupon = Coupons::where('code', $code)
-            ->where('expires_at', '>', now())
-            ->first();
-
-        if (!$coupon) {
-            return response()->json(['valid' => false, 'message' => 'Cupom inválido ou expirado.'], 400);
-        }
-
-        return response()->json([
-            'valid' => true,
-            'code'  => $coupon->code,
-            'type'  => $coupon->type,
-            'value' => $coupon->discount_value,
-        ]);
     }
 
     /**
@@ -135,76 +112,31 @@ class CouponsController extends Controller
      */
     public function applyCoupon(Request $request)
     {
-        $request->validate([
-            'code'  => 'required|string',
-            'total' => 'required|numeric|min:0',
-        ]);
+        $request->validate(['code' => 'required|string|max:50'] + Products::CART_RULES);
 
-        $coupon = Coupons::where('code', $request->code)
-            ->where('active', true)
-            ->first();
+        $coupon = Coupons::findByCode($request->code);
 
         if (!$coupon) {
             return response()->json(['error' => 'Cupom inválido ou inexistente.'], 404);
         }
 
-        if (now()->gt($coupon->expiration_date)) {
-            return response()->json(['error' => 'Cupom expirado.'], 400);
+        // Subtotal calculado no servidor a partir do carrinho (não confia no total do cliente)
+        $subtotal = Products::subtotalFor($request->input('items'));
+
+        if ($reason = $coupon->rejectionReason($subtotal)) {
+            return response()->json(['error' => $reason], 400);
         }
 
-        if ($coupon->max_use <= 0) {
-            return response()->json(['error' => 'Este cupom atingiu o limite de usos.'], 400);
-        }
+        $discountValue = $coupon->discountFor($subtotal);
 
-        if ($request->total < $coupon->min_discount) {
-            return response()->json([
-                'error' => 'O valor mínimo para usar este cupom é R$ ' .
-                    number_format($coupon->min_discount, 2, ',', '.')
-            ], 400);
-        }
-
-        $discountValue = $coupon->discount_type === 'percentual'
-            ? ($request->total * ($coupon->discount_value / 100))
-            : $coupon->discount_value;
-
-        $discountValue = min($discountValue, $request->total);
-
-        // Decrementa o uso e salva na sessão
-        $coupon->decrement('max_use');
-        session(['discount' => $discountValue]);
-
-        // Desativa se necessário
-        $this->deactivateCoupon(new Request(['code' => $coupon->code]));
+        // Só guarda o código: o desconto é recalculado e o uso é contado no checkout
+        session(['applied_coupon' => $coupon->code]);
 
         return response()->json([
-    'success'   => true,
-    'discount'  => $discountValue, // envia número puro, sem formatar
-    'new_total' => $request->total - $discountValue,
-]);
-
-    }
-
-    /**
-     * Desativa cupom manualmente
-     */
-    public function deactivateCoupon(Request $request)
-    {
-        $request->validate([
-            'code' => 'required|string',
+            'success'   => true,
+            'discount'  => $discountValue, // envia número puro, sem formatar
+            'new_total' => round($subtotal - $discountValue, 2),
         ]);
-
-        $coupon = Coupons::where('code', $request->code)->first();
-
-        if (!$coupon) {
-            return response()->json(['error' => 'Cupom inválido ou inexistente.'], 404);
-        }
-
-        if ($coupon->max_use <= 0 || now()->gt(Carbon::parse($coupon->expiration_date))) {
-            $coupon->active = false;
-            $coupon->save();
-        }
-
-        return response()->json(['success' => 'Cupom desativado com sucesso.']);
     }
 
     /**

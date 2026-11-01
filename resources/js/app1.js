@@ -237,19 +237,24 @@ document.getElementById("apply-coupon")?.addEventListener("click", async () => {
   const code = document.getElementById("coupon-code").value.trim();
   if (!code) return alert("Digite um código de cupom válido");
 
-  const total = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
+  // O servidor calcula o total pelos itens; só enviamos id e quantidade
+  const items = cart.map(i => ({ id: i.id, qty: i.qty }));
 
   try {
     const res = await fetch("/apply-coupon", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrfToken() },
-      body: JSON.stringify({ code, total })
+      headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-TOKEN": csrfToken() },
+      body: JSON.stringify({ code, items })
     });
     const data = await res.json();
     const msg = document.getElementById("coupon-message");
     msg.style.display = "block";
 
-    if (res.ok) {
+    if (res.status === 401) {
+      appliedCoupon = null;
+      msg.style.color = "red";
+      msg.textContent = "Entre na sua conta para usar um cupom.";
+    } else if (res.ok) {
       appliedCoupon = { amount: Number(parseFloat(data.discount).toFixed(2)) };
       renderCart();
       msg.style.color = "green";

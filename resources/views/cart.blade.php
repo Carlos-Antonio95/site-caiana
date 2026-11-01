@@ -145,9 +145,10 @@ document.getElementById('btn-finalizar')?.addEventListener('click', async () => 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ items: cart, address_id: addressId })
+            body: JSON.stringify({ items: cart.map(i => ({ id: i.id, qty: i.qty })), address_id: addressId })
         });
 
         const data = await res.json();

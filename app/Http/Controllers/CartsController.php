@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Carts;
 use App\Models\CartItems;
+use App\Models\Coupons;
 use App\Models\Client;
 use App\Models\Addresses;
 use App\Models\Orders;
@@ -11,6 +12,7 @@ use App\Models\OrderItems;
 use App\Models\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartsController extends Controller
 {
@@ -175,13 +177,18 @@ class CartsController extends Controller
 public function checkout(Request $request)
 {
     $user = Auth::user();
-    $items = $request->input('items', []);
+
+    // 🔹 Valida itens (ids existentes, qty inteiro >= 1) e endereço
+    $request->validate(Products::CART_RULES + ['address_id' => 'required|integer']);
+
+    // Só produtos ativos entram no pedido; preço sempre do banco
+    $items = collect($request->input('items'))
+        ->map(fn ($item) => ['product' => Products::where('status', 'ativo')->find($item['id']), 'qty' => (int) $item['qty']])
+        ->filter(fn ($item) => $item['product'])
+        ->values();
     $addressId = $request->input('address_id');
 
-    $discount = session('discount', 0);
-    $couponCode = session('applied_coupon') ?? null;
-
-    if (empty($items)) {
+    if ($items->isEmpty()) {
         return response()->json(['success' => false, 'message' => 'Carrinho vazio'], 400);
     }
 
@@ -199,60 +206,67 @@ public function checkout(Request $request)
         return response()->json(['success' => false, 'message' => 'Endereço inválido'], 400);
     }
 
-    // 🔹 Cria o carrinho
-    $cart = Carts::create([
-        'id_clients'   => $client->id,
-        'session_id'   => session()->getId(),
-        'id_addresses' => $addressId,
-    ]);
-
-    $total = 0;
-
-    // 🔹 Cria os itens do carrinho
-    foreach ($items as $item) {
-        $product = Products::find($item['id']);
-        if (!$product) continue;
-
-        CartItems::create([
-            'id_carts'    => $cart->id,
-            'id_products' => $product->id,
-            'quantity'    => $item['qty'],
-            'price'       => $product->final_price,
-            'title'       => $product->title,
-            'session_id'  => $cart->session_id,
+    $order = DB::transaction(function () use ($client, $addressId, $items) {
+        // 🔹 Cria o carrinho
+        $cart = Carts::create([
+            'id_clients'   => $client->id,
+            'session_id'   => session()->getId(),
         ]);
 
-        $total += $product->final_price * $item['qty'];
-    }
+        $total = 0;
 
-    // 🔹 Aplica o desconto
-    $finalTotal = max(0, $total - $discount);
+        // 🔹 Cria os itens do carrinho
+        foreach ($items as ['product' => $product, 'qty' => $qty]) {
+            CartItems::create([
+                'id_carts'    => $cart->id,
+                'id_products' => $product->id,
+                'quantity'    => $qty,
+                'price'       => $product->final_price,
+                'title'       => $product->title,
+                'session_id'  => $cart->session_id,
+            ]);
 
-    // 🔹 Cria o pedido
-    $order = Orders::create([
-        'id_clients'   => $client->id,
-        'id_addresses' => $addressId,
-        'status'       => 'pendente',
-        'total_value'  => $finalTotal,
-        'discount'     => $discount,
-    ]);
+            $total += $product->final_price * $qty;
+        }
 
-    // 🔹 Cria os itens do pedido
-    foreach ($items as $item) {
-        $product = Products::find($item['id']);
-        if (!$product) continue;
+        // 🔹 Cupom: recalcula o desconto e só agora conta o uso
+        $discount = 0;
+        $coupon = session('applied_coupon')
+            ? Coupons::where('code', session('applied_coupon'))->lockForUpdate()->first()
+            : null;
+        if ($coupon && ! $coupon->rejectionReason($total)) {
+            $discount = $coupon->discountFor($total);
+            $coupon->max_use -= 1;
+            if ($coupon->max_use <= 0) {
+                $coupon->active = false;
+            }
+            $coupon->save();
+        }
 
-        OrderItems::create([
-            'id_order'   => $order->id,
-            'id_product' => $product->id,
-            'title'      => $product->title,
-            'price'      => $product->final_price,
-            'quantity'   => $item['qty'],
+        // 🔹 Cria o pedido
+        $order = Orders::create([
+            'id_clients'   => $client->id,
+            'id_addresses' => $addressId,
+            'status'       => 'pendente',
+            'total_value'  => round(max(0, $total - $discount), 2),
         ]);
-    }
+
+        // 🔹 Cria os itens do pedido
+        foreach ($items as ['product' => $product, 'qty' => $qty]) {
+            OrderItems::create([
+                'id_order'   => $order->id,
+                'id_product' => $product->id,
+                'title'      => $product->title,
+                'price'      => $product->final_price,
+                'quantity'   => $qty,
+            ]);
+        }
+
+        return $order;
+    });
 
     // 🔹 Limpa sessões e salva pedido
-    session()->forget('discount');
+    session()->forget('applied_coupon');
     session(['last_order' => $order]);
 
     return response()->json([
