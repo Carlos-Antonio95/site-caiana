@@ -57,7 +57,7 @@
         return back()->withErrors([
             'email' => 'As credenciais não conferem.',
         ]);
-    });
+    })->middleware('throttle:5,1');
 
     // ===================== Registro =====================
  
@@ -65,9 +65,9 @@
 // ===================== Registro =====================
 Route::post('/register', function (\Illuminate\Http\Request $request) {
     $data = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users',
-        'phone' => 'required|string',
+        'name' => 'required|string|max:200', // clients.full_name é varchar(200)
+        'email' => 'required|email|max:255|unique:users',
+        'phone' => 'required|string|max:20',
         'date_birth' => 'required|date',
         'password' => 'required|string|confirmed|min:6',
     ]);
