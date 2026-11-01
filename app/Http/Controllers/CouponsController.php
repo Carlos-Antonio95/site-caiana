@@ -76,7 +76,7 @@ class CouponsController extends Controller
 
         Coupons::create($request->all());
 
-        return redirect()->route('coupons.index')->with('success', 'Cupom criado com sucesso!');
+        return redirect()->route('admin.coupons.index')->with('success', 'Cupom criado com sucesso!');
     }
 
     /**

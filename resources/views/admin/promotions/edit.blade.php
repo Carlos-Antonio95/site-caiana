@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('promotions.update', $promotion) }}" method="POST">
+        <form action="{{ route('admin.promotions.update', $promotion) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -35,7 +35,7 @@
             </select>
 
             <button type="submit" class="btn btn-success mt-3">Atualizar</button>
-            <a href="{{ route('promotions.index') }}" class="btn btn-secondary mt-3">Voltar</a>
+            <a href="{{ route('admin.promotions.index') }}" class="btn btn-secondary mt-3">Voltar</a>
         </form>
     </div>
 </div>

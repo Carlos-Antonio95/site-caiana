@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('order_items.update', $orderItem) }}" method="POST">
+        <form action="{{ route('admin.order_items.update', $orderItem) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -33,7 +33,7 @@
             <input type="number" name="price" class="form-control" value="{{ $orderItem->price }}" min="0" step="0.01" required>
 
             <button type="submit" class="btn btn-success mt-2">Atualizar</button>
-            <a href="{{ route('orders.show', $orderItem->id_order) }}" class="btn btn-secondary mt-2">Voltar</a>
+            <a href="{{ route('admin.orders.show', $orderItem->id_order) }}" class="btn btn-secondary mt-2">Voltar</a>
         </form>
     </div>
 </div>

@@ -26,7 +26,7 @@
         <hr>
         <h3>Itens do Pedido</h3>
         @if(Auth::user()->role === 'admin')
-            <a href="{{ route('order_items.create', ['order_id' => $order->id]) }}" class="btn btn-primary mb-2">+ Adicionar Item</a>
+            <a href="{{ route('admin.order_items.create', ['order_id' => $order->id]) }}" class="btn btn-primary mb-2">+ Adicionar Item</a>
         @endif
         <table class="table">
             <thead>
@@ -51,8 +51,8 @@
                         <td>R$ {{ number_format($item->price * $item->quantity, 2, ',', '.') }}</td>
                         @if(Auth::user()->role === 'admin')
                             <td>
-                                <a href="{{ route('order_items.edit', $item) }}" class="btn btn-warning btn-sm">Editar</a>
-                                <form action="{{ route('order_items.destroy', $item) }}" method="POST" style="display:inline;">
+                                <a href="{{ route('admin.order_items.edit', $item) }}" class="btn btn-warning btn-sm">Editar</a>
+                                <form action="{{ route('admin.order_items.destroy', $item) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-danger btn-sm" onclick="return confirm('Excluir item?')">Excluir</button>
@@ -69,7 +69,7 @@
         @if(Auth::user()->role === 'admin')
             <hr>
             <h4>Alterar Status</h4>
-            <form id="changeStatusForm" action="{{ route('admin.orders.changeStatusTest', $order) }}" method="POST">
+            <form id="changeStatusForm" action="{{ route('admin.orders.status', $order) }}" method="POST">
                 @csrf
                 <label>Status:</label>
                 <select name="status" class="form-control" onchange="this.form.submit()">
@@ -85,7 +85,7 @@
             </form>
         @endif
 
-        <a href="{{ route('orders.index') }}" class="btn btn-secondary mt-2">Voltar</a>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary mt-2">Voltar</a>
         @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-warning mt-2">Editar</a>
         @endif

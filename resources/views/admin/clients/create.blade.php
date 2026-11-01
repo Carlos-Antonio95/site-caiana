@@ -21,7 +21,7 @@
             <input type="date" name="date_birth" class="form-control" required>
 
             <button type="submit" class="btn btn-success">Salvar</button>
-            <a href="{{ route('clients.index') }}" class="btn btn-secondary">Voltar</a>
+            <a href="{{ route('admin.clients.index') }}" class="btn btn-secondary">Voltar</a>
         </form>
         
 <div id="success-notif" class="notification success"></div>

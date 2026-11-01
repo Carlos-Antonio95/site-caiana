@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('orders.update', $order) }}" method="POST">
+        <form action="{{ route('admin.orders.update', $order) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -44,7 +44,7 @@
             <input type="number" name="total_value" class="form-control" min="0" step="0.01" value="{{ $order->total_value }}" required>
 
             <button type="submit" class="btn btn-success mt-2">Atualizar</button>
-            <a href="{{ route('orders.index') }}" class="btn btn-secondary mt-2">Voltar</a>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary mt-2">Voltar</a>
         </form>
     </div>
 </div>

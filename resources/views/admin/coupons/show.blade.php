@@ -23,10 +23,10 @@
         <p><strong>Usos Máximos:</strong> {{ $coupon->max_use }}</p>
         <p><strong>Status:</strong> {{ $coupon->active ? 'Ativo' : 'Inativo' }}</p>
 
-        <a href="{{ route('coupons.index') }}" class="btn btn-secondary">Voltar</a>
-        <a href="{{ route('coupons.edit', $coupon) }}" class="btn btn-warning">Editar</a>
+        <a href="{{ route('admin.coupons.index') }}" class="btn btn-secondary">Voltar</a>
+        <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-warning">Editar</a>
 
-        <form action="{{ route('coupons.destroy', $coupon) }}" method="POST" style="display:inline;">
+        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display:inline;">
             @csrf
             @method('DELETE')
             <button class="btn btn-danger" onclick="return confirm('Excluir cupom?')">Excluir</button>

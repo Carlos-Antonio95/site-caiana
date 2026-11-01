@@ -24,9 +24,9 @@
                     <tr>
                         <td>{{ $client->full_name }}</td>
                         <td>
-                            <a href="{{ route('clients.show', $client) }}" class="btn btn-info">Ver</a>
-                            <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Editar</a>
-                            <form action="{{ route('clients.destroy', $client) }}" method="POST" style="display:inline;">
+                            <a href="{{ route('admin.clients.show', $client) }}" class="btn btn-info">Ver</a>
+                            <a href="{{ route('admin.clients.edit', $client) }}" class="btn btn-warning">Editar</a>
+                            <form action="{{ route('admin.clients.destroy', $client) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-danger" onclick="return confirm('Excluir cliente?')">Excluir</button>

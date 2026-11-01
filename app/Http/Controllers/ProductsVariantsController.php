@@ -54,7 +54,7 @@ class ProductsVariantsController extends Controller
 
         Products_Variants::create($request->all());
 
-        return redirect()->route('product_variants.index')->with('success', 'Variante criada com sucesso!');
+        return redirect()->route('admin.product_variants.index')->with('success', 'Variante criada com sucesso!');
     }
 
     /**
@@ -93,7 +93,7 @@ class ProductsVariantsController extends Controller
 
         $productVariant->update($request->all());
 
-        return redirect()->route('product_variants.index')->with('success', 'Variante atualizada com sucesso!');
+        return redirect()->route('admin.product_variants.index')->with('success', 'Variante atualizada com sucesso!');
     }
 
     /**
@@ -105,7 +105,7 @@ class ProductsVariantsController extends Controller
 
         $productVariant->delete();
 
-        return redirect()->route('product_variants.index')->with('success', 'Variante deletada com sucesso!');
+        return redirect()->route('admin.product_variants.index')->with('success', 'Variante deletada com sucesso!');
     }
 
     /**

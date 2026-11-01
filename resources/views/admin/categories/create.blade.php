@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('categories.store') }}" method="POST">
+        <form action="{{ route('admin.categories.store') }}" method="POST">
             @csrf
 
             <label>Nome da Categoria</label>
@@ -20,7 +20,7 @@
 
             <br>
             <button type="submit" class="btn btn-success">Salvar</button>
-            <a href="{{ route('categories.index') }}" class="btn btn-secondary">Voltar</a>
+            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">Voltar</a>
         </form>
     </div>
 </div>

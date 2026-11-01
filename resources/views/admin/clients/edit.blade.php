@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('clients.update', $client) }}" method="POST">
+        <form action="{{ route('admin.clients.update', $client) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -23,7 +23,7 @@
             <input type="date" name="date_birth" class="form-control" value="{{ $client->date_birth }}" required>
 
             <button type="submit" class="btn btn-success">Atualizar</button>
-            <a href="{{ route('clients.index') }}" class="btn btn-secondary">Voltar</a>
+            <a href="{{ route('admin.clients.index') }}" class="btn btn-secondary">Voltar</a>
         </form>
     </div>
 </div>

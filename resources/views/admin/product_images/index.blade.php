@@ -39,7 +39,7 @@
                             @endif
                         </td>
                         <td>
-                            <form action="{{ route('product_images.destroy', $image) }}" method="POST" 
+                            <form action="{{ route('admin.product_images.destroy', $image) }}" method="POST" 
                                   onsubmit="return confirm('Deseja realmente excluir esta imagem?')">
                                 @csrf
                                 @method('DELETE')

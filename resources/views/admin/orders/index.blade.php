@@ -36,8 +36,8 @@
                         <td>
                             <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-info">Ver</a>
                             @if(Auth::user()->role === 'admin')
-                                <a href="{{ route('orders.edit', $order) }}" class="btn btn-warning">Editar</a>
-                                <form action="{{ route('orders.destroy', $order) }}" method="POST" style="display:inline;">
+                                <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-warning">Editar</a>
+                                <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-danger" onclick="return confirm('Excluir pedido?')">Excluir</button>

@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('promotion_products.store') }}" method="POST">
+        <form action="{{ route('admin.promotion_products.store') }}" method="POST">
             @csrf
 
             <label>Promoção</label>
@@ -39,7 +39,7 @@
             <input type="number" step="0.01" name="promotional_price" class="form-control" value="{{ old('promotional_price') }}" min="0">
 
             <button type="submit" class="btn btn-success mt-3">Salvar</button>
-            <a href="{{ route('promotion_products.index') }}" class="btn btn-secondary mt-3">Voltar</a>
+            <a href="{{ route('admin.promotion_products.index') }}" class="btn btn-secondary mt-3">Voltar</a>
         </form>
     </div>
 </div>

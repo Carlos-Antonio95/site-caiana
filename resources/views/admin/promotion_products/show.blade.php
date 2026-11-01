@@ -14,10 +14,10 @@
         <p><strong>Desconto (%):</strong> {{ $promotionProduct->percentage_discount ?? '-' }}</p>
         <p><strong>Preço Promocional:</strong> {{ $promotionProduct->promotional_price ?? '-' }}</p>
 
-        <a href="{{ route('promotion_products.index') }}" class="btn btn-secondary">Voltar</a>
-        <a href="{{ route('promotion_products.edit', $promotionProduct) }}" class="btn btn-warning">Editar</a>
+        <a href="{{ route('admin.promotion_products.index') }}" class="btn btn-secondary">Voltar</a>
+        <a href="{{ route('admin.promotion_products.edit', $promotionProduct) }}" class="btn btn-warning">Editar</a>
 
-        <form action="{{ route('promotion_products.destroy', $promotionProduct) }}" method="POST" style="display:inline;">
+        <form action="{{ route('admin.promotion_products.destroy', $promotionProduct) }}" method="POST" style="display:inline;">
             @csrf
             @method('DELETE')
             <button class="btn btn-danger" onclick="return confirm('Remover promoção do produto?')">Excluir</button>

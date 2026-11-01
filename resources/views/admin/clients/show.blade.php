@@ -13,8 +13,8 @@
         <p><strong>Telefone:</strong> {{ $client->phone }}</p>
         <p><strong>Data de Nascimento:</strong> {{ $client->date_birth }}</p>
 
-        <a href="{{ route('clients.index') }}" class="btn btn-secondary">Voltar</a>
-        <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning">Editar</a>
+        <a href="{{ route('admin.clients.index') }}" class="btn btn-secondary">Voltar</a>
+        <a href="{{ route('admin.clients.edit', $client) }}" class="btn btn-warning">Editar</a>
     </div>
 </div>
 @endsection

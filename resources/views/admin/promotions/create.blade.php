@@ -9,7 +9,7 @@
 @section('content')
 <div class="container">
     <div class="card">
-        <form action="{{ route('promotions.store') }}" method="POST">
+        <form action="{{ route('admin.promotions.store') }}" method="POST">
             @csrf
 
             <label>Nome</label>
@@ -34,7 +34,7 @@
             </select>
 
             <button type="submit" class="btn btn-success mt-3">Salvar</button>
-            <a href="{{ route('promotions.index') }}" class="btn btn-secondary mt-3">Voltar</a>
+            <a href="{{ route('admin.promotions.index') }}" class="btn btn-secondary mt-3">Voltar</a>
         </form>
     </div>
 </div>

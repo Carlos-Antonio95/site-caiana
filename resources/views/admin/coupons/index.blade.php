@@ -46,9 +46,9 @@
                         <td>{{ $coupon->max_use }}</td>
                         <td>{{ $coupon->active ? 'Ativo' : 'Inativo' }}</td>
                         <td>
-                            <a href="{{ route('coupons.show', $coupon) }}" class="btn btn-info btn-sm">Ver</a>
-                            <a href="{{ route('coupons.edit', $coupon) }}" class="btn btn-warning btn-sm">Editar</a>
-                            <form action="{{ route('coupons.destroy', $coupon) }}" method="POST" style="display:inline;">
+                            <a href="{{ route('admin.coupons.show', $coupon) }}" class="btn btn-info btn-sm">Ver</a>
+                            <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-danger btn-sm" onclick="return confirm('Excluir cupom?')">Excluir</button>

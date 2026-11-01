@@ -50,7 +50,7 @@ class ProductsImagesController extends Controller
 
         Products_Images::create($request->all());
 
-        return redirect()->route('product_images.index')->with('success', 'Imagem adicionada com sucesso!');
+        return redirect()->route('admin.product_images.index')->with('success', 'Imagem adicionada com sucesso!');
     }
 
     /**
@@ -87,7 +87,7 @@ class ProductsImagesController extends Controller
 
         $productImage->update($request->all());
 
-        return redirect()->route('product_images.index')->with('success', 'Imagem atualizada com sucesso!');
+        return redirect()->route('admin.product_images.index')->with('success', 'Imagem atualizada com sucesso!');
     }
 
     /**
@@ -105,7 +105,7 @@ class ProductsImagesController extends Controller
     // Deletar registro do banco
     $productImage->delete();
 
-    return redirect()->route('product_images.index')->with('success', 'Imagem deletada com sucesso!');
+    return redirect()->route('admin.product_images.index')->with('success', 'Imagem deletada com sucesso!');
 }
 
 

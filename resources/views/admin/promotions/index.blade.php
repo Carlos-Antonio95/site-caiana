@@ -10,7 +10,7 @@
 <div class="container">
     <div class="card">
         <h2>Promoções</h2>
-        <a href="{{ route('promotions.create') }}" class="btn btn-primary mb-3">+ Nova Promoção</a>
+        <a href="{{ route('admin.promotions.create') }}" class="btn btn-primary mb-3">+ Nova Promoção</a>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -36,9 +36,9 @@
                         <td>{{ $promotion->end_date }}</td>
                         <td>{{ $promotion->active ? 'Ativo' : 'Inativo' }}</td>
                         <td>
-                            <a href="{{ route('promotions.show', $promotion) }}" class="btn btn-info btn-sm">Ver</a>
-                            <a href="{{ route('promotions.edit', $promotion) }}" class="btn btn-warning btn-sm">Editar</a>
-                            <form action="{{ route('promotions.destroy', $promotion) }}" method="POST" style="display:inline;">
+                            <a href="{{ route('admin.promotions.show', $promotion) }}" class="btn btn-info btn-sm">Ver</a>
+                            <a href="{{ route('admin.promotions.edit', $promotion) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <form action="{{ route('admin.promotions.destroy', $promotion) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-danger btn-sm" onclick="return confirm('Excluir promoção?')">Excluir</button>

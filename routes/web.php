@@ -1,4 +1,4 @@
-    <?php
+<?php
     use App\Models\Addresses;
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Route;
@@ -6,8 +6,8 @@
         UsersController, ClientController, AddressesController, CategoriesController,
         ProductsController, ProductsVariantsController, PromotionsController,
         ProductsImagesController, PromotionProductController, ProductReviewsController,
-        CouponsController, CartItemController, CartsController, OrdersController,
-        OrderItemsController, PaymentsController, AdminActivityController,
+        CouponsController, CartsController, OrdersController,
+        OrderItemsController, PaymentsController, AdminActivityController, CartItemController,
         ContactController
     };
 
@@ -118,54 +118,19 @@ Route::post('/register', function (\Illuminate\Http\Request $request) {
         Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])->name('password.email');
     });
 
-Route::get('/meus_pedidos', [\App\Http\Controllers\OrdersController::class, 'meusPedidos'])
-    ->name('meus.pedidos')
-    ->middleware('auth');
-
-    // ===================== Rotas Protegidas (Auth) =====================
+    // ===================== Rotas do Cliente (Auth) =====================
     Route::middleware('auth')->group(function () {
-
-        // Checkout do carrinho
-        Route::post('/cart/checkout', [CartsController::class, 'checkout'])
-            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-
-        // CRUD geral protegido por auth
-        Route::resources([
-            'users' => UsersController::class,
-            'clients' => ClientController::class,
-            'addresses' => AddressesController::class,
-            'categories' => CategoriesController::class,
-            'products' => ProductsController::class,
-            'product_variants' => ProductsVariantsController::class,
-            'promotions' => PromotionsController::class,
-            'product_images' => ProductsImagesController::class,
-            'promotion_products' => PromotionProductController::class,
-            'product_reviews' => ProductReviewsController::class,
-            'coupons' => CouponsController::class,
-            'cart_items' => CartItemController::class,
-            'carts' => CartsController::class,
-            'orders' => OrdersController::class,
-            'order_items' => OrderItemsController::class,
-            'payments' => PaymentsController::class,
-            'admin_activities' => AdminActivityController::class,
-            
-        ]);
-
-        // Rotas extras CRUD
-        Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
-        Route::get('/product_variants/{product}/create', [ProductsVariantsController::class, 'create'])->name('product_variants.create');
-        Route::get('/product_reviews/create/{id}', [ProductReviewsController::class, 'create'])->name('product_reviews.create');
+        Route::get('/meus_pedidos', [OrdersController::class, 'meusPedidos'])->name('meus.pedidos');
+        Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
         Route::post('/addresses', [AddressesController::class, 'store'])->name('addresses.store');
 
+        // Checkout do carrinho
+        Route::post('/cart/checkout', [CartsController::class, 'checkout']);
     });
-
-    // ===================== Dashboard =====================
-    Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
-        ->get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
     // ===================== Rotas Admin =====================
     Route::prefix('admin')
-        ->middleware(['auth'])
+        ->middleware(['auth', 'admin'])
         ->name('admin.')
         ->group(function () {
             // Redireciona admin para dashboard
@@ -174,9 +139,14 @@ Route::get('/meus_pedidos', [\App\Http\Controllers\OrdersController::class, 'meu
             // CRUD Admin
             Route::resources([
                 'products' => ProductsController::class,
+                'product_variants' => ProductsVariantsController::class,
+                'product_images' => ProductsImagesController::class,
+                'product_reviews' => ProductReviewsController::class,
                 'promotions' => PromotionsController::class,
                 'promotion_products' => PromotionProductController::class,
                 'orders' => OrdersController::class,
+                'order_items' => OrderItemsController::class,
+                'payments' => PaymentsController::class,
                 'users' => UsersController::class,
                 'admin-activities' => AdminActivityController::class,
                 'coupons' => CouponsController::class,
@@ -184,15 +154,18 @@ Route::get('/meus_pedidos', [\App\Http\Controllers\OrdersController::class, 'meu
                 'addresses' => AddressesController::class,
                 'carts' => CartsController::class,
                 'cart_items' => CartItemController::class,
-                'order_items' => OrderItemsController::class,
-                'products_images' => ProductsImagesController::class,
                 'categories' => CategoriesController::class,
                 'contacts' => ContactController::class,
             ]);
-                    Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
-                    Route::put('/users/{user}/demote', [UsersController::class, 'demoteToClient'])->name('users.demote');
-
+            Route::get('/product_variants/{product}/create', [ProductsVariantsController::class, 'create'])->name('product_variants.create');
+            Route::post('/orders/{order}/status', [OrdersController::class, 'changeStatusTest'])->name('orders.status');
+            Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
+            Route::put('/users/{user}/demote', [UsersController::class, 'demoteToClient'])->name('users.demote');
         });
+
+    // ===================== Dashboard (Admin) =====================
+    Route::middleware(['auth', 'admin'])
+        ->get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
     // ===================== Rotas API Pública =====================
     Route::get('/api/products', [ProductsController::class, 'getAll'])->name('api.products');
@@ -201,12 +174,4 @@ Route::get('/meus_pedidos', [\App\Http\Controllers\OrdersController::class, 'meu
 
     Route::post('/coupons/validate', [CouponsController::class, 'validateCoupon']);
 
-
-    // ===================== Rotas de Teste Pedidos =====================
-    Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatus']);
-    Route::view('/test-status', 'test-status');
-    Route::post('/test/orders/{order}/status', [OrdersController::class, 'changeStatusTest'])
-        ->name('admin.orders.changeStatusTest'); // Adicione este nome
-
-        Route::post('/contato', [ContactController::class, 'store'])->name('contato.store');
-
+    Route::post('/contato', [ContactController::class, 'store'])->name('contato.store');

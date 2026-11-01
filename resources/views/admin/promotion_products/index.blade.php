@@ -10,7 +10,7 @@
 <div class="container">
     <div class="card">
         <h2>Promoções Aplicadas</h2>
-        <a href="{{ route('promotion_products.create') }}" class="btn btn-primary mb-3">+ Nova Promoção de Produto</a>
+        <a href="{{ route('admin.promotion_products.create') }}" class="btn btn-primary mb-3">+ Nova Promoção de Produto</a>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -38,8 +38,8 @@
                             <td>{{ $item->promotional_price ?? '-' }}</td>
                             <td>
                                 <a href="{{ route('admin.promotion_products.show', $item) }}" class="btn btn-info btn-sm">Ver</a>
-                                <a href="{{ route('promotion_products.edit', $item) }}" class="btn btn-warning btn-sm">Editar</a>
-                                <form action="{{ route('promotion_products.destroy', $item) }}" method="POST" style="display:inline;">
+                                <a href="{{ route('admin.promotion_products.edit', $item) }}" class="btn btn-warning btn-sm">Editar</a>
+                                <form action="{{ route('admin.promotion_products.destroy', $item) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-danger btn-sm" onclick="return confirm('Remover promoção do produto?')">Excluir</button>

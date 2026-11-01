@@ -59,7 +59,7 @@ class ProductReviewsController extends Controller
             'status' => 'pendente', // avaliação inicial
         ]);
 
-        return redirect()->route('product_reviews.index')->with('success', 'Avaliação enviada com sucesso!');
+        return redirect()->route('admin.product_reviews.index')->with('success', 'Avaliação enviada com sucesso!');
     }
 
     /**
@@ -100,7 +100,7 @@ class ProductReviewsController extends Controller
 
         $productReview->update($request->all());
 
-        return redirect()->route('product_reviews.index')->with('success', 'Avaliação atualizada com sucesso!');
+        return redirect()->route('admin.product_reviews.index')->with('success', 'Avaliação atualizada com sucesso!');
     }
 
     /**
@@ -114,7 +114,7 @@ class ProductReviewsController extends Controller
 
         $productReview->delete();
 
-        return redirect()->route('product_reviews.index')->with('success', 'Avaliação deletada com sucesso!');
+        return redirect()->route('admin.product_reviews.index')->with('success', 'Avaliação deletada com sucesso!');
     }
 
     /**

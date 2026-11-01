@@ -23,8 +23,8 @@
         <p><strong>CEP:</strong> {{ $addresses->cep }}</p>
         <p><strong>País:</strong> {{ $addresses->country }}</p>
 
-        <a href="{{ route('addresses.index') }}" class="btn btn-secondary">Voltar</a>
-        <a href="{{ route('addresses.edit', $addresses) }}" class="btn btn-warning">Editar</a>
+        <a href="{{ route('admin.addresses.index') }}" class="btn btn-secondary">Voltar</a>
+        <a href="{{ route('admin.addresses.edit', $addresses) }}" class="btn btn-warning">Editar</a>
     </div>
 </div>
 @endsection
