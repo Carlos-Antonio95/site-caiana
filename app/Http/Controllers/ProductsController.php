@@ -6,6 +6,7 @@ use App\Models\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Categories;
+use App\Models\Products_Images;
 
 
 class ProductsController extends Controller
@@ -79,7 +80,7 @@ public function publicIndex()
             'price'           => 'required|numeric|min:0',
             'stock_quantity'  => 'required|integer|min:0',
             'status'          => 'required|in:ativo,inativo',
-            'image'           => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image'           => 'nullable|' . Products_Images::UPLOAD_RULES,
         ]);
 
         $product = Products::create($request->only([
@@ -92,21 +93,9 @@ public function publicIndex()
         ]));
 
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
+            $path = Products_Images::storeUpload($request->file('image'));
 
-            // public/assets (servido em /assets)
-            $destinationPath = public_path('assets');
-
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0775, true);
-            }
-
-            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($destinationPath, $fileName);
-
-            $path = 'assets/' . $fileName; // Mantém variável $path
-
-            \App\Models\Products_Images::create([
+            Products_Images::create([
                 'id_products' => $product->id,
                 'image_path'  => $path,
                 'is_primary'  => true,
@@ -139,7 +128,7 @@ public function publicIndex()
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'status' => 'required|in:ativo,inativo',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_path' => 'nullable|' . Products_Images::UPLOAD_RULES,
         ]);
 
         $product->update($request->only([
@@ -152,24 +141,12 @@ public function publicIndex()
         ]));
 
         if ($request->hasFile('image_path')) {
-            $file = $request->file('image_path');
-
-            $destinationPath = public_path('assets');
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0775, true);
-            }
-
-            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($destinationPath, $fileName);
-
-            $path = 'assets/' . $fileName;
+            $path = Products_Images::storeUpload($request->file('image_path'));
 
             $image = $product->images->first();
             if ($image) {
                 // Deleta arquivo antigo
-                if (file_exists(public_path($image->image_path))) {
-                    @unlink(public_path($image->image_path));
-                }
+                Products_Images::deleteFile($image->image_path);
                 $image->update(['image_path' => $path]);
             } else {
                 $product->images()->create([

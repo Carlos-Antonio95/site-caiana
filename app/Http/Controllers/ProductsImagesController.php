@@ -44,11 +44,11 @@ class ProductsImagesController extends Controller
 
         $request->validate([
             'id_products' => 'required|exists:products,id',
-            'image_path' => 'required|string|max:255',
+            'image_path' => ['required', 'string', 'max:255', 'regex:' . Products_Images::PATH_REGEX],
             'is_primary' => 'nullable|boolean',
         ]);
 
-        Products_Images::create($request->all());
+        Products_Images::create($request->only(['id_products', 'image_path', 'is_primary']));
 
         return redirect()->route('admin.product_images.index')->with('success', 'Imagem adicionada com sucesso!');
     }
@@ -81,11 +81,11 @@ class ProductsImagesController extends Controller
 
         $request->validate([
             'id_products' => 'required|exists:products,id',
-            'image_path' => 'required|string|max:255',
+            'image_path' => ['required', 'string', 'max:255', 'regex:' . Products_Images::PATH_REGEX],
             'is_primary' => 'nullable|boolean',
         ]);
 
-        $productImage->update($request->all());
+        $productImage->update($request->only(['id_products', 'image_path', 'is_primary']));
 
         return redirect()->route('admin.product_images.index')->with('success', 'Imagem atualizada com sucesso!');
     }
@@ -97,10 +97,8 @@ class ProductsImagesController extends Controller
 {
     $this->authorizeAdmin();
 
-    // Deletar arquivo físico se existir
-    if (file_exists(public_path($productImage->image_path))) {
-        @unlink(public_path($productImage->image_path));
-    }
+    // Deletar arquivo físico (só dentro de public/assets)
+    Products_Images::deleteFile($productImage->image_path);
 
     // Deletar registro do banco
     $productImage->delete();
