@@ -95,6 +95,7 @@ Feitos em Docker, já que o PHP local é 7.4: **PHP 8.3.36 (CLI) + pdo_pgsql, Po
 
 - `/admin/order_items` → 500 (a view `admin/order_items/index` nunca existiu; nada aponta para ela).
 - `ProductsController@show` usa a view `products.show`, que não existe.
+- Variantes no admin (`/admin/product_variants/*`) → 500: as views `product_variants.*` nunca existiram.
 - `ContactController@update` grava a coluna `respondido`, que não existe.
 - Trocar a foto de um produto demo pelo admin **apaga o arquivo original** em `public/assets`. Para restaurar: `git checkout -- public/assets` e rodar o DemoSeeder de novo.
 

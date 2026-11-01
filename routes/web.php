@@ -158,7 +158,6 @@ Route::post('/register', function (\Illuminate\Http\Request $request) {
                 'categories' => CategoriesController::class,
                 'contacts' => ContactController::class,
             ]);
-            Route::get('/product_variants/{product}/create', [ProductsVariantsController::class, 'create'])->name('product_variants.create');
             Route::post('/orders/{order}/status', [OrdersController::class, 'changeStatusTest'])->name('orders.status');
             Route::put('/users/{user}/promote', [UsersController::class, 'promoteToAdmin'])->name('users.promote');
             Route::put('/users/{user}/demote', [UsersController::class, 'demoteToClient'])->name('users.demote');
