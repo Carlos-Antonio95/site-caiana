@@ -13,16 +13,4 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    build: {
-        outDir: 'public/build',
-        manifest: true,
-        rollupOptions: {
-            input: [
-                'resources/css/styles.css',
-                'resources/js/app1.js',
-                'resources/css/admin.css',
-                'resources/js/app.js',
-            ],
-        },
-    },
 });
