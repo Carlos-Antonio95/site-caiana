@@ -27,7 +27,6 @@ class AdminSeeder extends Seeder
             [
                 'name' => config('admin.name'),
                 'password' => $password, // o cast 'hashed' do model aplica o hash
-                'role' => 'admin',
             ]
         );
 

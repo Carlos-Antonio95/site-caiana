@@ -43,12 +43,13 @@ class UsersController extends Controller
     ]);
 
     try {
-        User::create([
+        $user = new User([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
         ]);
+        $user->role = $request->role; // role não é mass assignable
+        $user->save();
 
         return redirect()
             ->route('admin.users.index')
@@ -84,16 +85,30 @@ class UsersController extends Controller
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email,' . $user->id,
         'password' => 'nullable|string|min:6|confirmed',
-        'role' => 'required|in:cliente,admin',
+        'role' => 'sometimes|in:cliente,admin',
     ]);
 
+    // Só admin altera role, e nunca rebaixa a si mesmo
+    if ($request->filled('role') && $request->role !== $user->role) {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Acesso negado! Apenas admins podem alterar o perfil de acesso.');
+        }
+        if (Auth::id() === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Você não pode rebaixar a si mesmo.');
+        }
+    }
+
     try {
-        $data = $request->only(['name', 'email', 'role']);
+        $data = $request->only(['name', 'email']);
         if ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
 
-        $user->update($data);
+        $user->fill($data);
+        if ($request->filled('role') && Auth::user()->role === 'admin') {
+            $user->role = $request->role;
+        }
+        $user->save();
 
         return redirect()
             ->route('admin.users.index')

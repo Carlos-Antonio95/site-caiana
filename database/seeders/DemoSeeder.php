@@ -164,7 +164,6 @@ class DemoSeeder extends Seeder
             $user = User::firstOrCreate(['email' => $email], [
                 'name' => $name,
                 'password' => Str::random(40), // conta só de exemplo, sem senha conhecida
-                'role' => 'cliente',
             ]);
 
             $client = Client::firstOrCreate(['id_users' => $user->id], [
