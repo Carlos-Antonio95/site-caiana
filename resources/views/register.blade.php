@@ -164,5 +164,11 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
+<style>
+.auth-wrapper {
+    background: transparent !important;
+     
+}
+</style>
 
 @endsection

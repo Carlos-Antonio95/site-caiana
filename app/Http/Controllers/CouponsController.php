@@ -94,7 +94,7 @@ class CouponsController extends Controller
     public function edit(Coupons $coupon)
     {
         $this->authorizeAdmin();
-        return view('coupons.edit', compact('coupon'));
+        return view('admin.coupons.edit', compact('coupon'));
     }
 
     /**

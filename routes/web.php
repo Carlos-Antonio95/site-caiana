@@ -31,7 +31,12 @@
     Route::get('/cart', [CartsController::class, 'showCart'])->name('cart.show');
     Route::get('/promocoes', [PromotionsController::class, 'siteIndex'])->name('promocoes');
     Route::get('/sucesso', [OrdersController::class, 'sucesso'])->name('sucesso');
-    
+    Route::view('/politica_privacidade', 'politica_privacidade')->name('politica');
+    Route::view('/termos', 'termos')->name('termos');
+
+
+
+
 
 
     // ===================== Login =====================

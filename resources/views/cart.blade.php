@@ -19,7 +19,7 @@
             </div>
 
             <div class="coupon mt-3">
-                <h4>Aplicar Cupom</h4>
+                <h4 style="color: black">Aplicar Cupom</h4>
                 <input type="text" id="coupon-code" placeholder="Digite seu cupom" />
                 <button type="button" id="apply-coupon" class="btn btn-secondary">Aplicar</button>
                 <p id="coupon-message" style="color: green; display: none;"></p>
@@ -165,4 +165,9 @@ document.getElementById('btn-finalizar')?.addEventListener('click', async () => 
     }
 });
 </script>
+<style>
+    #subtotal {
+        color: black !important;
+    }
+</style>
 @endsection

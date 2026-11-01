@@ -150,11 +150,12 @@ html, body { overflow-x: hidden; }
 
 <div class="container header-inner">
     <div class="brand">
-       <a href="{{ route('index') }}" class="logo-link">
-           <span class="logo-text">CAIANA</span>
-           <span class="logo-parrot" aria-hidden="true">🦜</span>
-       </a>
+        <a href="{{ route('index') }}" class="logo-link">
+            <span class="logo-text">CAIANA</span>
+            <img src="{{ asset('favicon.png') }}" alt="Logo Arara" class="logo-parrot-img">
+        </a>
     </div>
+
 
     <nav class="main-nav">
         <a href="{{ route('index') }}" class="@yield('nav-index')">🏠 Início</a>
@@ -219,4 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+<style>
+.logo-parrot-img {
+    width: 4.8em;   /* tamanho aproximado do emoji */
+    height: 3.4em;
+    vertical-align: middle;
+    margin-right: 0px; /* espaço entre o texto e a imagem */
+}</style>
+
 <!--</header>-->

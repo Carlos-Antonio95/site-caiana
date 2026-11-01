@@ -4,12 +4,13 @@
 
 @section('content')
 <main style="padding:2rem; max-width:800px; margin:auto;">
+    <article class= "card">
     <h1>Meus Pedidos</h1>
 
     @if($orders->isEmpty())
-        <p>Você não possui pedidos pendentes ou em andamento.</p>
+        <p style="color: black;">Você não possui pedidos pendentes ou em andamento.</p>
     @else
-        <table style="width:100%; border-collapse:collapse; margin-top:2rem;">
+        <table style="width:100%; border-collapse:collapse; margin-top:2rem; color: black;">
             <thead>
                 <tr style="border-bottom:1px solid #ccc;">
                     <th>ID</th>
@@ -19,6 +20,7 @@
                     <th>Ações</th>
                 </tr>
             </thead>
+            
             <tbody>
                 @foreach($orders as $order)
                 <tr style="border-bottom:1px solid #eee;">
@@ -34,6 +36,8 @@
                 @endforeach
             </tbody>
         </table>
+        </article>
     @endif
 </main>
 @endsection
+

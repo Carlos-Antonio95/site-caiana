@@ -55,7 +55,7 @@
         </a>
 
         @if($whatsappMessage)
-            <a href="https://wa.me/5581981327731?text={{ $whatsappMessage }}" 
+            <a href="https://wa.me/5581995387102?text={{ $whatsappMessage }}" 
                style="border:2px solid green; color:green; padding:1rem; text-decoration:none; border-radius:8px;">
                Continuar no WhatsApp
             </a>

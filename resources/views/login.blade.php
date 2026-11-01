@@ -36,20 +36,46 @@
                 <input id="password" type="password" name="password" required class="auth-input">
             </div>
 
-            <div class="flex items-center justify-between mb-4">
-                <label>
-                    <input type="checkbox" name="remember"> Lembrar-me
-                </label>
+      <div class="contenier">
+              <div>
+        <span style= "color: black;">Lembrar-me</span>
+    </div>
+    <div class="esquerda">
+        <input type="checkbox" name="remember" class="checkbox">
+    </div>
 
-                @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="auth-link">
-                        Esqueceu sua senha?
-                    </a>
-                @endif
-            </div>
+</div>
+<div class="senha">
+    @if (Route::has('password.request'))
+        <a href="{{ route('password.request') }}" class="text-sm text-green-600 hover:underline">
+            Esqueceu sua senha?
+        </a>
+    @endif
+</div>
+
 
             <button type="submit" class="auth-btn">Entrar</button>
         </form>
     </div>
 </div>
 @endsection
+<style>
+/* CSS custom para sobrescrever o build */
+.backdrop {
+    background-color: transparent !important;
+}
+.auth-wrapper {
+    background: transparent !important;
+     background-color: transparent !important;
+}
+
+</style>
+
+<style>
+
+.contenier {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px; /* espaçamento entre checkbox e texto */
+}</style>

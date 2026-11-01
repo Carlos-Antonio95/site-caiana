@@ -1,22 +1,20 @@
 <footer class="site-footer">
     <div class="container footer-inner">
-        <p>© <span id="year"></span> CAIANA • Moda Tropical</p>
+         <p style="color: black;">© <span id="year"></span> CAIANA • Moda Tropical</p>
+            <a href="{{ route('politica') }}" style="color: black;">Política de Privacidade</a>
+            <a href="{{ route('termos') }}" style="color: black;">Termos</a>
 
-        <div class="social-links">
-            <a href="https://www.instagram.com/seuinstagram" target="_blank" aria-label="Instagram">
-                <i class="fab fa-instagram"></i>
+            <!-- Ícone Instagram -->
+            <a href="https://www.instagram.com/caianabyana?igsh=NDZcHV0DJ0c3Nz" target="_blank" aria-label="Instagram">
+                <img src="{{ asset('assets/insta.png') }}" alt="Instagram" class="social-icon">
             </a>
-            <a href="https://www.facebook.com/seufacebook" target="_blank" aria-label="Facebook">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="https://wa.me/5599999999999" target="_blank" aria-label="WhatsApp">
-                <i class="fab fa-whatsapp"></i>
-            </a>
-        </div>
 
+            <!-- Ícone WhatsApp -->
+            <a href="https://wa.me/5581995387102" target="_blank" aria-label="WhatsApp">
+                <img src="{{ asset('assets/wats.png') }}" alt="WhatsApp" class="social-icon">
+            </a>
         <div class="mini">
-            <a href="#">Política de Privacidade</a>
-            <a href="#">Termos</a>
+           
         </div>
     </div>
 </footer>
@@ -28,17 +26,16 @@
 <style>
 /* ====== Footer compacto ====== */
 .site-footer {
-    background: #d9f5ff;
-    color: #15203b;
+    display: inline-flex;
     font-size: 0.8rem;
     padding: 0.4rem 0;
     text-align: center;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    border-top: 0px solid rgba(0,0,0,0.05);
     margin-top: auto;
 }
 
 .footer-inner {
-    display: flex;
+    
     justify-content: center;
     align-items: center;
     gap: 1rem;
@@ -48,13 +45,31 @@
 .site-footer .mini a {
     text-decoration: none;
     font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .site-footer .mini a:hover {
     text-decoration: underline;
+    
 }
 
-/* Faz o footer ficar colado ao fundo da tela quando o conteúdo é curto */
+/* Ícones das redes sociais */
+.social-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    margin-left: 6px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.social-icon:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+
+/* Mantém o footer fixado ao fundo */
 html, body {
     height: 100%;
     display: flex;
@@ -64,28 +79,4 @@ html, body {
 main {
     flex: 1;
 }
-.site-footer{
-    padding-top: 0px;
-    padding-bottom: 0px;
-    height: 0px;
-    border-top-width: 0px;
-}
-
-/* Redes sociais */
-.social-links {
-    display: flex;
-    gap: 0.8rem;
-    justify-content: center;
-}
-
-.social-links a {
-    color: #15203b;
-    font-size: 1.2rem;
-    transition: color 0.3s;
-}
-
-.social-links a:hover {
-    color: #009688;
-}
-
 </style>

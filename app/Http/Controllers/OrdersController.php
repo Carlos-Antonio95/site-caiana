@@ -47,18 +47,26 @@ class OrdersController  extends Controller
      */
 
  public function meusPedidos()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // Buscar pedidos do usuário com status relevantes
-        $orders = Orders::with(['items.product', 'address'])
-            ->where('id_clients', $user->id)
-            ->whereIn('status', ['pendente', 'pago', 'aprovado', 'enviado'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+    // Busca o registro do cliente vinculado a este usuário
+    $client = \App\Models\Client::where('id_users', $user->id)->first();
 
-        return view('meus_pedidos', compact('orders'));
+    if (!$client) {
+        return view('meus_pedidos', ['orders' => collect()]);
     }
+
+    // Agora filtra pelos pedidos desse cliente
+    $orders = Orders::with(['items.product', 'address'])
+        ->where('id_clients', $client->id)
+        ->whereIn('status', ['pendente', 'pago', 'aprovado', 'enviado', 'cancelado'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('meus_pedidos', compact('orders'));
+}
+
 
     /**
      * Formulário de criação de pedido
@@ -118,6 +126,9 @@ class OrdersController  extends Controller
     // Cliente só pode acessar seus pedidos
     $this->authorizeClient($order);
     return view('show', compact('order'));
+   //  $this->authorizeClient($order);
+   // return view('meus_pedidos_show', compact('order')); // view específica do cliente
+
 }
 
 
@@ -177,14 +188,25 @@ class OrdersController  extends Controller
     /**
      * Verifica se o cliente logado pode acessar o pedido.
      */
-    private function authorizeClient(Orders $order)
-    {
-        $user = Auth::user();
+   private function authorizeClient(Orders $order)
+{
+    $user = Auth::user();
 
-        if ($user->role !== 'admin' && $order->id_clients !== $user->id) {
-            abort(403, 'Acesso negado! Você não pode acessar este pedido.');
-        }
+    // Admin sempre pode ver
+    if ($user->role === 'admin') {
+        return true;
     }
+
+    // Pega o registro do cliente associado ao usuário
+    $client = \App\Models\Client::where('id_users', $user->id)->first();
+
+    // Se o cliente não existir ou não for o dono do pedido → bloqueia
+    if (!$client || $order->id_clients !== $client->id) {
+        abort(403, 'Acesso negado! Você não pode acessar este pedido.');
+    }
+
+    return true;
+}
 /*
  public function changeStatus(Request $request, Orders $order)
 {

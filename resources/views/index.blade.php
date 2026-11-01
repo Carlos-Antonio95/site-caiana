@@ -6,11 +6,12 @@
 
 @section('content')
 <main id="home">
+    
     <!-- HERO -->
     <section class="hero container">
         <div class="hero-text">
-            <h1>Te Vestindo <span>Com Brasilidade</span></h1>
-            <p>Estampas vibrantes, conforto e estilo para todas as ocasiões.</p>
+            <h1>Te Vestindo <span>com Brasilidade</span></h1>
+            <p style="color: black;">Estampas vibrantes, conforto e estilo para todas as ocasiões.</p>
             <a href="#catalogo" class="btn btn-dark">Ver Produtos</a>
         </div>
         <div class="hero-art">
@@ -71,3 +72,4 @@
     <div class="backdrop" id="backdrop"></div>
 </main>
 @endsection
+
