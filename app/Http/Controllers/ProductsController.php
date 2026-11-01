@@ -94,8 +94,8 @@ public function publicIndex()
         if ($request->hasFile('image')) {
             $file = $request->file('image');
 
-            // Caminho absoluto para public_html/assets
-            $destinationPath = $_SERVER['DOCUMENT_ROOT'] . '/assets';
+            // public/assets (servido em /assets)
+            $destinationPath = public_path('assets');
 
             if (!file_exists($destinationPath)) {
                 mkdir($destinationPath, 0775, true);
@@ -154,7 +154,7 @@ public function publicIndex()
         if ($request->hasFile('image_path')) {
             $file = $request->file('image_path');
 
-            $destinationPath = $_SERVER['DOCUMENT_ROOT'] . '/assets';
+            $destinationPath = public_path('assets');
             if (!file_exists($destinationPath)) {
                 mkdir($destinationPath, 0775, true);
             }
@@ -167,8 +167,8 @@ public function publicIndex()
             $image = $product->images->first();
             if ($image) {
                 // Deleta arquivo antigo
-                if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $image->image_path)) {
-                    @unlink($_SERVER['DOCUMENT_ROOT'] . '/' . $image->image_path);
+                if (file_exists(public_path($image->image_path))) {
+                    @unlink(public_path($image->image_path));
                 }
                 $image->update(['image_path' => $path]);
             } else {

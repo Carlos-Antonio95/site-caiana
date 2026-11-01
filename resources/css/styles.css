@@ -31,7 +31,6 @@ main {
   flex: 1;
 }
 
-.auth-wrapper { background-color: #c3ecff !important; }
 
 .site-footer {
     padding: 0.5rem 0;         /* Reduz o espaço interno */
@@ -47,7 +46,6 @@ main {
     font-size: 0.8em;          /* Links menores */
     margin-left: 0.5rem;
 }
-.auth-wrapper { background-color: #c3ecff !important; }
 
 .container{width:min(1100px, 92%); margin:auto}
 .btn{
@@ -401,3 +399,5 @@ button, .btn {
 
 
 
+
+.container{width:min(1400px, 100%); margin:auto}

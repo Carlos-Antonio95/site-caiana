@@ -1,6 +1,7 @@
 // ===== Elements =====
 const els = {
   products: document.querySelector(".products"),
+  promotions: document.querySelector(".promotions"),
   search: document.querySelector("#search"),
   chipCategorias: document.querySelector("#chip-categorias"),
   preco: document.querySelector("#preco"),
@@ -33,6 +34,12 @@ let appliedCoupon = null;
 // ===== Utils =====
 const BRL = v => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
 const saveCart = () => localStorage.setItem('cart', JSON.stringify(cart));
+const csrfToken = () => document.querySelector('meta[name="csrf-token"]').content;
+
+// image_path é relativo a public/ (ex.: "assets/arquivo.jpg")
+const imageUrl = p => p.images?.[0]?.image_path
+  ? `/${p.images[0].image_path.replace(/^\/+/, '')}`
+  : '/assets/default.jpg';
 
 // ===== Fetch produtos =====
 async function fetchProducts() {
@@ -41,6 +48,7 @@ async function fetchProducts() {
     if (!res.ok) throw new Error('Erro ao buscar produtos');
     PRODUCTS = await res.json();
     renderProducts();
+    renderPromotions();
   } catch (err) {
     console.error(err);
   }
@@ -49,10 +57,9 @@ async function fetchProducts() {
 // ===== Apply filters =====
 function applyFilters(list) {
   return list.filter(p => {
-   const catMatch =
-  filters.category === "tudo" ||
-  (p.category?.category_name?.toLowerCase?.() === filters.category.toLowerCase()) ||
-  (p.category_name?.toLowerCase?.() === filters.category.toLowerCase());
+    const catMatch =
+      filters.category === "tudo" ||
+      p.category?.category_name.toLowerCase() === filters.category.toLowerCase();
 
     const titleMatch = !filters.q || p.title.toLowerCase().includes(filters.q);
     const priceMatch = p.price <= filters.maxPrice;
@@ -60,23 +67,23 @@ function applyFilters(list) {
   });
 }
 
-// ===== Render produtos =====
-function renderProducts() {
-  if (!els.products) return;
-  const items = applyFilters(PRODUCTS).filter(p => p.status === 'ativo' && p.stock_quantity > 0);
-  els.products.innerHTML = items.map(p => {
+// ===== Render de uma grade de produtos =====
+function renderGrid(items, container) {
+  if (!container) return;
+  if (items.length === 0) {
+    container.innerHTML = "<p>Não há produtos no momento.</p>";
+    return;
+  }
+  container.innerHTML = items.map(p => {
     const hasDiscount = p.final_price && p.final_price < p.price;
-    const imgPath = p.images?.[0]?.image_path 
-      ? `/storage/app/public/assets/${p.images[0].image_path}` 
-      : '/assets/default.jpg';
     return `
       <article class="card" data-id="${p.id}">
-        <img src="${imgPath}" alt="${p.title}" />
+        <img src="${imageUrl(p)}" alt="${p.title}" />
         <h4>${p.title}</h4>
         <div class="price">
-          ${hasDiscount 
-            ? `<span style="text-decoration: line-through; color: #999;">${BRL(p.price)}</span> 
-               <span style="color: red; font-weight: bold;">${BRL(p.final_price)}</span>` 
+          ${hasDiscount
+            ? `<span style="text-decoration: line-through; color: #999;">${BRL(p.price)}</span>
+               <span style="color: red; font-weight: bold;">${BRL(p.final_price)}</span>`
             : BRL(p.price)}
         </div>
         <button class="btn btn-dark add-cart">Adicionar ao carrinho</button>
@@ -84,7 +91,7 @@ function renderProducts() {
     `;
   }).join("");
 
-  document.querySelectorAll(".add-cart").forEach(btn => {
+  container.querySelectorAll(".add-cart").forEach(btn => {
     btn.addEventListener("click", e => {
       const id = parseInt(e.target.closest(".card").dataset.id, 10);
       addToCart(id);
@@ -92,10 +99,23 @@ function renderProducts() {
   });
 }
 
+// ===== Render produtos =====
+function renderProducts() {
+  const items = applyFilters(PRODUCTS).filter(p => p.status === 'ativo' && p.stock_quantity > 0);
+  renderGrid(items, els.products);
+}
+
+// ===== Render promoções (produtos com preço final menor) =====
+function renderPromotions() {
+  const items = PRODUCTS.filter(p => p.status === 'ativo' && p.stock_quantity > 0 && p.final_price < p.price);
+  renderGrid(items, els.promotions);
+}
+
 // ===== Filtros =====
 els.search?.addEventListener("input", e => {
   filters.q = e.target.value.trim().toLowerCase();
   renderProducts();
+  renderPromotions();
 });
 
 els.chipCategorias?.querySelectorAll(".chip").forEach(chip => {
@@ -104,6 +124,7 @@ els.chipCategorias?.querySelectorAll(".chip").forEach(chip => {
     e.target.classList.add("is-active");
     filters.category = e.target.dataset.category.toLowerCase();
     renderProducts();
+    renderPromotions();
   });
 });
 
@@ -111,6 +132,7 @@ els.preco?.addEventListener("input", e => {
   filters.maxPrice = parseFloat(e.target.value);
   if (els.precoVal) els.precoVal.textContent = `Até ${filters.maxPrice}`;
   renderProducts();
+  renderPromotions();
 });
 
 // ===== Cart functions =====
@@ -120,15 +142,12 @@ function addToCart(id) {
   else {
     const prod = PRODUCTS.find(p => p.id === id);
     if (prod) {
-      const imgPath = prod.images?.[0]?.image_path 
-        ? `/storage/app/public/assets/${prod.images[0].image_path}` 
-        : '/assets/default.jpg';
       cart.push({
         id: prod.id,
         title: prod.title,
         price: prod.price,
         final_price: prod.final_price,
-        img: imgPath,
+        img: imageUrl(prod),
         qty: 1
       });
     }
@@ -146,23 +165,22 @@ function renderCart() {
     return `
       <div class="cart-item" data-id="${i.id}">
         <img src="${i.img}" alt="${i.title}" />
-        <div class="meta">
+        <div class="meta" style="color: black !important;">
           <strong>${i.title}</strong><br/>
           <small>
-            ${hasDiscount 
-              ? `<span style="text-decoration: line-through; color: #999;">${BRL(i.price)}</span> 
-                 <span style="color: red; font-weight: bold;">${BRL(i.final_price)}</span>` 
+            ${hasDiscount
+              ? `<span style="text-decoration: line-through; color: #999;">${BRL(i.price)}</span> <span style="color: red; font-weight: bold;">${BRL(i.final_price)}</span>`
               : BRL(i.price)}
           </small>
         </div>
         <div class="qty">
           <button class="dec">-</button>
-          <span>${i.qty}</span>
+          <span style="color: black;">${i.qty}</span>
           <button class="inc">+</button>
         </div>
       </div>
     `;
-  }).join("") : "<p>Seu carrinho está vazio.</p>";
+  }).join("") : '<p style="color: black;">Seu carrinho está vazio.</p>';
 
   const subtotal = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
   let total = subtotal;
@@ -213,6 +231,104 @@ function closeDrawer() { els.drawer?.classList.remove("open"); els.backdrop?.cla
 els.cartBtn?.addEventListener("click", openDrawer);
 els.closeDrawer?.addEventListener("click", closeDrawer);
 els.backdrop?.addEventListener("click", closeDrawer);
+
+// ===== Cupom =====
+document.getElementById("apply-coupon")?.addEventListener("click", async () => {
+  const code = document.getElementById("coupon-code").value.trim();
+  if (!code) return alert("Digite um código de cupom válido");
+
+  const total = cart.reduce((s, i) => s + (i.final_price || i.price) * i.qty, 0);
+
+  try {
+    const res = await fetch("/apply-coupon", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrfToken() },
+      body: JSON.stringify({ code, total })
+    });
+    const data = await res.json();
+    const msg = document.getElementById("coupon-message");
+    msg.style.display = "block";
+
+    if (res.ok) {
+      appliedCoupon = { amount: Number(parseFloat(data.discount).toFixed(2)) };
+      renderCart();
+      msg.style.color = "green";
+      msg.textContent = "Cupom aplicado com sucesso!";
+    } else {
+      appliedCoupon = null;
+      renderCart();
+      msg.style.color = "red";
+      msg.textContent = data.error || "Erro ao aplicar cupom";
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao aplicar cupom");
+  }
+});
+
+// ===== Checkout =====
+els.checkout?.addEventListener("click", () => {
+  closeDrawer();
+  window.location.href = "/cart";
+});
+
+// ===== CEP (ViaCEP) =====
+document.getElementById("btn-cep")?.addEventListener("click", async () => {
+  const cep = document.getElementById("cep").value.replace(/\D/g, "");
+  if (!cep) return alert("Digite um CEP válido");
+
+  try {
+    const data = await (await fetch(`https://viacep.com.br/ws/${cep}/json/`)).json();
+    if (data.erro) return alert("CEP não encontrado");
+
+    document.getElementById("road").value = data.logradouro;
+    document.getElementById("neighborhood").value = data.bairro;
+    document.getElementById("city").value = data.localidade;
+    document.getElementById("state").value = data.uf;
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao buscar CEP");
+  }
+});
+
+// ===== Endereço =====
+document.getElementById("address-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+
+  try {
+    const res = await fetch("/addresses", {
+      method: "POST",
+      headers: { "X-CSRF-TOKEN": csrfToken() },
+      body: formData
+    });
+    if (res.ok) {
+      alert("Endereço salvo!");
+      window.location.reload();
+    } else {
+      alert("Erro ao salvar endereço");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao salvar endereço");
+  }
+});
+
+document.getElementById("btn-change-address")?.addEventListener("click", () => {
+  const form = document.getElementById("address-form");
+  form.style.display = form.style.display === "none" ? "block" : "none";
+});
+
+// ===== Rodapé =====
+const year = document.querySelector("#year");
+if (year) year.textContent = new Date().getFullYear();
+
+// ===== Logout limpa o carrinho =====
+document.getElementById("logout-form")?.addEventListener("submit", () => {
+  cart = [];
+  saveCart();
+  updateCartCount();
+});
 
 // ===== Init =====
 fetchProducts();
