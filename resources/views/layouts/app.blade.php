@@ -166,6 +166,13 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
+    {{-- Faixa de demonstração (portfólio) --}}
+    @if(config('loja.demo'))
+        <div style="background:#1f2937; color:#f9fafb; font-size:.75rem; text-align:center; padding:.3rem 1rem; letter-spacing:.02em;">
+            Loja demonstrativa — pagamento simulado
+        </div>
+    @endif
+
     {{-- Header incluído --}}
     @include('layouts.header')
 

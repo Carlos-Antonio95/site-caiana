@@ -54,8 +54,8 @@
            Acompanhar pedido
         </a>
 
-        @if($whatsappMessage)
-            <a href="https://wa.me/5581995387102?text={{ $whatsappMessage }}" 
+        @if($whatsappMessage && config('loja.whatsapp_number'))
+            <a href="https://wa.me/{{ config('loja.whatsapp_number') }}?text={{ $whatsappMessage }}"
                style="border:2px solid green; color:green; padding:1rem; text-decoration:none; border-radius:8px;">
                Continuar no WhatsApp
             </a>

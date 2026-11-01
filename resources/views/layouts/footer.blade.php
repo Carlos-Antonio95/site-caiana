@@ -5,14 +5,18 @@
             <a href="{{ route('termos') }}" style="color: black;">Termos</a>
 
             <!-- Ícone Instagram -->
-            <a href="https://www.instagram.com/caianabyana?igsh=NDZcHV0DJ0c3Nz" target="_blank" aria-label="Instagram">
+            @if(config('loja.instagram_url'))
+            <a href="{{ config('loja.instagram_url') }}" target="_blank" rel="noopener" aria-label="Instagram">
                 <img src="{{ asset('assets/insta.png') }}" alt="Instagram" class="social-icon">
             </a>
+            @endif
 
             <!-- Ícone WhatsApp -->
-            <a href="https://wa.me/5581995387102" target="_blank" aria-label="WhatsApp">
+            @if(config('loja.whatsapp_number'))
+            <a href="https://wa.me/{{ config('loja.whatsapp_number') }}" target="_blank" rel="noopener" aria-label="WhatsApp">
                 <img src="{{ asset('assets/wats.png') }}" alt="WhatsApp" class="social-icon">
             </a>
+            @endif
         <div class="mini">
            
         </div>
