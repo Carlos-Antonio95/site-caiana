@@ -15,15 +15,4 @@ return [
     'whatsapp_number' => preg_replace('/\D/', '', (string) env('WHATSAPP_NUMBER', '')),
     'instagram_url' => env('INSTAGRAM_URL'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Modo demonstração
-    |--------------------------------------------------------------------------
-    |
-    | Mostra a faixa "Loja demonstrativa — pagamento simulado" no topo.
-    |
-    */
-
-    'demo' => (bool) env('LOJA_DEMO', true),
-
 ];

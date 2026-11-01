@@ -23,7 +23,7 @@ Legenda: 🔴 bloqueia deploy · 🟠 corrigir logo · 🔵 melhoria · ✅ reso
 | `c7c672c` | **Upload** — ver seção 3. |
 | `3ac8b8a` | **Cupom e checkout** — ver seção 3. |
 | `d8e0dfd` | **Throttle no login** e `max:` no cadastro. |
-| `85df545` | **WhatsApp/Instagram via config** (`WHATSAPP_NUMBER`, `INSTAGRAM_URL`) e faixa "Loja demonstrativa — pagamento simulado" (`LOJA_DEMO`). |
+| `85df545` | **WhatsApp/Instagram via config** (`WHATSAPP_NUMBER`, `INSTAGRAM_URL`). A faixa "Loja demonstrativa" adicionada aqui foi retirada depois, a pedido. |
 | `b5cd6e2` | `wpp-bot/` no `.gitignore` (a branch não tinha nada do bot). |
 
 ### Decisões que vale saber
