@@ -22,7 +22,7 @@ class ContactController extends Controller
             'email' => $request->email,
             'mensagem' => $request->mensagem,
             'session_id' => Session::getId(),
-            'client_id' => Auth::check() ? Auth::id() : null,
+            'client_id' => Auth::user()?->client?->id,
         ]);
 
         return response()->json(['success' => true]);

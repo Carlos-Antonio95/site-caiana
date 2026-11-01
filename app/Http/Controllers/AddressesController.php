@@ -162,7 +162,7 @@ class AddressesController extends Controller
         $user = Auth::user();
 
         // Se não for admin e o endereço não for do usuário logado, bloqueia
-        if ($user->role !== 'admin' && $address->id_clients !== $user->id) {
+        if ($user->role !== 'admin' && $address->id_clients !== $user->client?->id) {
             abort(403, 'Acesso negado! Você não pode acessar este endereço.');
         }
     }

@@ -30,7 +30,7 @@ class OrdersController  extends Controller
             $orders = Orders::with(['client', 'address'])->get();
         } else {
             $orders = Orders::with(['client', 'address'])
-                ->where('id_clients', $user->id)
+                ->where('id_clients', $user->client?->id)
                 ->get();
         }
 

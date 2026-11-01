@@ -53,7 +53,7 @@ class ProductReviewsController extends Controller
 
         ProductReviews::create([
             'id_products' => $request->id_products,
-            'id_clients' => Auth::id(),
+            'id_clients' => Auth::user()->client?->id,
             'rating' => $request->rating,
             'comments' => $request->comments,
             'status' => 'pendente', // avaliação inicial
@@ -124,7 +124,7 @@ class ProductReviewsController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role !== 'admin' && $review->id_clients !== $user->id) {
+        if ($user->role !== 'admin' && $review->id_clients !== $user->client?->id) {
             abort(403, 'Acesso negado! Você não pode acessar esta avaliação.');
         }
     }

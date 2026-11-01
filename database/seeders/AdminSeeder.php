@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use RuntimeException;
@@ -34,6 +35,12 @@ class AdminSeeder extends Seeder
             $admin->role = 'admin';
             $admin->save();
         }
+
+        // MergeCartAfterLogin e outras telas esperam um registro em clients
+        Client::firstOrCreate(
+            ['id_users' => $admin->id],
+            ['full_name' => $admin->name, 'phone' => '(00) 00000-0000', 'date_birth' => '1990-01-01']
+        );
 
         $this->command?->info("Admin pronto: {$admin->email}");
     }

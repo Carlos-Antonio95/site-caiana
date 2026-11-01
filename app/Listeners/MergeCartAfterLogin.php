@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Authenticated;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use App\Models\Carts;
 
 class MergeCartAfterLogin
@@ -17,16 +15,14 @@ class MergeCartAfterLogin
      */
     public function handle(Authenticated $event)
     {
-        $user = $event->user;
+        // Usuários sem cadastro de cliente (ex.: admin) não têm carrinho
+        $clientId = $event->user->client?->id;
+        if (! $clientId) {
+            return;
+        }
 
-        // Pega o ID da sessão atual ou gera um ID único se não existir
-        $sessionId = session()->getId() ?: uniqid();
-
-        // Atualiza os carrinhos que pertencem a essa sessão
-        Carts::where('session_id', $sessionId)
-            ->update([
-                'id_clients' => $user->client->id,
-                'session_id' => $sessionId,
-            ]);
+        // Associa ao cliente os carrinhos criados nesta sessão
+        Carts::where('session_id', session()->getId())
+            ->update(['id_clients' => $clientId]);
     }
 }
