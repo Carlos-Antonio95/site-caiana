@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Validator;
 use RuntimeException;
 
 class AdminSeeder extends Seeder
@@ -20,6 +21,10 @@ class AdminSeeder extends Seeder
 
         if (! $email || ! $password) {
             throw new RuntimeException('Defina ADMIN_EMAIL e ADMIN_PASSWORD no .env antes de rodar o AdminSeeder.');
+        }
+
+        if (Validator::make(['email' => $email], ['email' => 'email'])->fails()) {
+            throw new RuntimeException("ADMIN_EMAIL inválido: \"{$email}\". Use um e-mail completo (ex.: admin@seudominio.com.br) no .env.");
         }
 
         $admin = User::firstOrCreate(
