@@ -25,7 +25,7 @@ public function siteIndex()
 
     // Pega apenas produtos que estão em promoções ativas e dentro da data
     $promoProducts = Products::whereHas('promotionProduct.promotion', function($q) use ($today) {
-        $q->where('active', 1)
+        $q->where('active', true)
           ->where('start_date', '<=', $today)
           ->where('end_date', '>=', $today);
     })
